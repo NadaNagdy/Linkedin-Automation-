@@ -25,6 +25,7 @@ jobs:
           # الربط بين اسم الـ Secret في GitHub والاسم في الكود
           LINKEDIN_TOKEN: ${{ secrets.LINKEDIN_TOKEN }} 
           LINKEDIN_PERSON_URN: ${{ secrets.LINKEDIN_PERSON_URN }}
+          LINKEDIN_AUTHOR_URN: ${{ secrets.LINKEDIN_AUTHOR_URN }}
         run: |
           python main_script.py
           python run_bot.py
