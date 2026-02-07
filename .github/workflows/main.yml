@@ -1,27 +1,15 @@
-name: Health Trends Auto-Post
-on:
-  schedule:
-    - cron: '0 9 * * *' # يعمل يومياً الساعة 9 صباحاً بتوقيت جرينتش
-  workflow_dispatch: # للتشغيل اليدوي للتجربة
+import requests
+import os
 
-jobs:
-  build-and-post:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.9'
-      
-      - name: Install dependencies
-        run: pip install -r requirements.txt
-        
-      - name: Run Automation Script
-        env:
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-          # الربط بين اسم الـ Secret في GitHub والاسم في الكود
-          LINKEDIN_TOKEN: ${{ secrets.LINKEDIN_ACCESS_TOKEN }} 
-          LINKEDIN_PERSON_URN: ${{ secrets.LINKEDIN_PERSON_URN }}
-        run: python main_script.py
+token = os.getenv("LINKEDIN_TOKEN")
+# استخدام userinfo بدلاً من me لأنها الأحدث في نظام الصلاحيات
+response = requests.get(
+    "https://api.linkedin.com/v2/userinfo", 
+    headers={"Authorization": f"Bearer {token}"}
+)
+
+if response.status_code == 200:
+    # الـ id هنا هو الـ Person URN اللي محتاجينه
+    print(f"✅ Your Person URN is: {response.json().get('sub')}")
+else:
+    print(f"❌ Error: {response.status_code} - {response.text}")
