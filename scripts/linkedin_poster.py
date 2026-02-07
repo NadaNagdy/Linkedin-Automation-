@@ -3,8 +3,12 @@ import os
 
 def post_to_linkedin(content):
     access_token = os.getenv("LINKEDIN_TOKEN")
-    person_urn = os.getenv("LINKEDIN_PERSON_URN") # رقم الـ ID الخاص بك
+    person_urn = os.getenv("LINKEDIN_PERSON_URN")
     
+    if not access_token or not person_urn:
+        print("❌ نقص في البيانات: LINKEDIN_TOKEN أو LINKEDIN_PERSON_URN غير موجود")
+        return None
+
     url = "https://api.linkedin.com/v2/ugcPosts"
     headers = {
         "Authorization": f"Bearer {access_token}",
@@ -24,8 +28,8 @@ def post_to_linkedin(content):
         "visibility": {"com.linkedin.ugc.MemberNetworkVisibility": "PUBLIC"}
     }
     
-    response = requests.post(url, headers=headers, json=post_data)
-    if response.status_code in [200, 201]:
-        print("Successfully posted to LinkedIn!")
-    else:
-        print(f"Failed to post: {response.status_code}, {response.text}")
+    try:
+        return requests.post(url, headers=headers, json=post_data)
+    except Exception as e:
+        print(f"❌ خطأ اتصال: {e}")
+        return None
