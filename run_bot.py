@@ -51,13 +51,14 @@ def main():
             client = OpenAI(api_key=openai_api_key)
             
             prompt = (
-                f"You are a friendly teacher who explains complex topics using simple analogies. "
-                f"I need a dual-language post (English and Arabic) about this headline: '{article_title}'. "
+                f"You are a friendly and knowledgeable health tech enthusiast. "
+                f"I need a dual-language post (English and Egyptian Arabic) about this headline: '{article_title}'. "
                 f"\n\nStructure:\n"
-                f"1. English Explanation (Simple, engaging, 4-5 sentences).\n"
+                f"1. English Section: Explain the core idea, results, and recommendations naturally in one flow. Do not use headers like 'Results' or 'Introduction'. Keep it engaging and professional (4-5 sentences).\n"
                 f"2. A separator line (---).\n"
-                f"3. Arabic Explanation (Same tone, simplified, using analogies).\n"
-                f"\nDo not mention 'Imagine a...'. Keep it educational and professional yet accessible."
+                f"3. Arabic Section: Explain the same content in **Egyptian Arabic** (اللهجة المصرية). "
+                f"Write it naturally as if speaking to a friend or colleague. Focus on the result and recommendation without saying 'The result is...' explicitly. "
+                f"Avoid formal Arabic (Fusha) terms where possible. Keep it simple and direct."
             )
             
             completion = client.chat.completions.create(
