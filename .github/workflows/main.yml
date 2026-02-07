@@ -23,6 +23,6 @@ jobs:
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           # الربط بين اسم الـ Secret في GitHub والاسم في الكود
-          LINKEDIN_TOKEN: ${{ secrets.LINKEDIN_ACCESS_TOKEN }} 
+          LINKEDIN_TOKEN: ${{ secrets.LINKEDIN_TOKEN }} 
           LINKEDIN_PERSON_URN: ${{ secrets.LINKEDIN_PERSON_URN }}
         run: python main_script.py
