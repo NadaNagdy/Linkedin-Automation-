@@ -56,6 +56,9 @@ def main():
         print(f"Post ID: {response.json().get('id')}")
     else:
         print("❌ Failed to post.")
+        if response:
+            print(f"Status Code: {response.status_code}")
+            print(f"Response: {response.text}")
         sys.exit(1) # Exit with error for CI/CD
 
 if __name__ == "__main__":

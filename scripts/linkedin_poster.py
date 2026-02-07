@@ -32,6 +32,8 @@ def post_to_linkedin(content, author_urn=None):
         print("❌ نقص في البيانات: LINKEDIN_PERSON_URN أو author_urn غير موجود")
         return None
 
+    print(f"🚀 Author URN: {final_author}")
+
     url = "https://api.linkedin.com/v2/ugcPosts"
     headers = {
         "Authorization": f"Bearer {access_token}",
