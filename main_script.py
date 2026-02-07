@@ -1,37 +1,49 @@
 import os
-from openai import OpenAI  # التغيير هنا في طريقة الاستدعاء
+from openai import OpenAI
 from scripts.scraper import fetch_trends
 from scripts.linkedin_poster import post_to_linkedin
+import requests
 
-# إعداد العميل (Client) بالطريقة الجديدة
-client = OpenAI(
-    api_key=os.getenv("OPENAI_API_KEY")
-)
+# إعداد العميل
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+
+def get_my_urn(token):
+    """وظيفة لاستخراج الـ URN تلقائياً إذا لم يكن موجوداً"""
+    res = requests.get("https://api.linkedin.com/v2/me", headers={"Authorization": f"Bearer {token}"})
+    if res.status_code == 200:
+        return res.json().get('id')
+    return None
 
 def main():
-    print("جاري البحث عن قصص علمية جديدة...")
+    token = os.getenv("LINKEDIN_TOKEN")
+    person_urn = os.getenv("LINKEDIN_PERSON_URN")
+
+    # إذا كان الـ URN ناقص، نحاول نجيبه بالـ Token
+    if not person_urn and token:
+        print("🔍 الـ URN غير موجود، جاري محاولة استخراجه...")
+        person_urn = get_my_urn(token)
+        if person_urn:
+            print(f"✅ تم العثور على الـ URN الخاص بك: {person_urn}")
+            print("💡 نصيحة: ضيف الرقم ده في GitHub Secrets باسم LINKEDIN_PERSON_URN عشان توفر وقت.")
+        else:
+            print("❌ فشل استخراج الـ URN، تأكد من صلاحية الـ Token.")
+            return
+
+    print("📖 جاري البحث عن قصص علمية جديدة...")
     trends = fetch_trends()
     
     if not trends:
-        print("لم يتم العثور على أخبار اليوم.")
+        print("📭 لم يتم العثور على أخبار جديدة اليوم.")
         return
 
-    # الـ Prompt المصمم بأسلوب المدرس الحكواتي
     prompt = f"""
-    بصفتك مدرساً واسع الاطلاع، ومبدعاً في تقريب العلوم للواقع.. 
-    اكتب مقالاً لـ LinkedIn بالعربية حول هذه التطورات:
+    بصفتك مدرساً مطلعاً وحكواتي بارع، اكتب مقالاً لـ LinkedIn بالعربية يبسط هذه العلوم:
     {chr(10).join(trends)}
 
-    الأسلوب المطلوب:
-    1. ابدأ بأسلوب "حكاية" (مثلاً: تخيل لو كان جسمنا.. أو هل سألت نفسك يوماً..).
-    2. بسط العلم المعقد بتشبيهات من حياتنا اليومية (مثل تشبيه الخلايا بالعمال، أو الـ AI ببوصلة ذكية).
-    3. خاطب المتخصصين بعمق المعلومة، وغير المتخصصين بسلاسة المعنى.
-    4. اجعل النبرة ملهمة تدعو للتفاؤل بمستقبل الصحة العامة.
-    5. أضف هاشتاجات: #صحة_عامة #تكنولوجيا_صحية #مستقبل_الطب.
+    الأسلوب: حكاية ملهمة، تشبيهات من الواقع، لغة تجمع بين المتخصص وغير المتخصص، ونبرة متفائلة.
     """
 
     try:
-        # التغيير هنا في طريقة طلب التوليد (v1.0.0+)
         response = client.chat.completions.create(
             model="gpt-3.5-turbo",
             messages=[
@@ -41,15 +53,18 @@ def main():
         )
         article = response.choices[0].message.content
         
-        print("جاري النشر على لينكد إن...")
+        print("📤 جاري النشر على لينكد إن...")
+        # نمرر الـ person_urn للوظيفة
+        os.environ["LINKEDIN_PERSON_URN"] = person_urn 
         result = post_to_linkedin(article)
-        if result.status_code in [200, 201]:
-            print("تم النشر بنجاح!")
+        
+        if result is not None and result.status_code in [200, 201]:
+            print("🚀 تم النشر بنجاح على بروفايلك!")
         else:
-            print(f"خطأ في النشر: {result.text}")
+            print(f"⚠️ فشل النشر: {result.text if result else 'No Response'}")
             
     except Exception as e:
-        print(f"حدث خطأ أثناء التوليد أو النشر: {e}")
+        print(f"💥 حدث خطأ: {e}")
 
 if __name__ == "__main__":
     main()
