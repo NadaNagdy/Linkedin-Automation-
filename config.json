@@ -1,0 +1,33 @@
+{
+    "project_name": "Health Tech Bot",
+    "version": "1.0.0",
+    "settings": {
+        "language": "en",
+        "timezone": "Africa/Cairo",
+        "openai_model": "gpt-3.5-turbo"
+    },
+    "search_queries": {
+        "wuzzuf": "medical",
+        "reliefweb": "health",
+        "scholarships": "medical",
+        "internships": "medical internship",
+        "ahram_category_url": "https://english.ahram.org.eg/Portal/54/0/Health.aspx"
+    },
+    "prompts": {
+        "system_role": "You are a friendly and knowledgeable health tech enthusiast.",
+        "content_generation": "I need a dual-language post (English and Egyptian Arabic) about this headline: '{article_title}'.\n\nStructure:\n1. English Section: Explain the core idea, results, and recommendations naturally in one flow. Do not use headers like 'Results' or 'Introduction'. Keep it engaging and professional (4-5 sentences).\n2. A separator line (---).\n3. Arabic Section: Explain the same content in **Egyptian Arabic** (اللهجة المصرية). Write it naturally as if speaking to a friend or colleague. Focus on the result and recommendation without saying 'The result is...' explicitly. Avoid formal Arabic (Fusha) terms where possible. Keep it simple and direct."
+    },
+    "posting": {
+        "hashtags": [
+            "#HealthTech",
+            "#Innovation",
+            "#Education",
+            "#PublicHealth",
+            "#Research",
+            "#Jobs",
+            "#Scholarships",
+            "#Internships"
+        ],
+        "author_urn_env_key": "LINKEDIN_AUTHOR_URN"
+    }
+}

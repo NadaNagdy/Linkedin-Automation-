@@ -32,7 +32,5 @@ jobs:
           # Added Facebook secret for the script to use
           FB_ACCESS_TOKEN: ${{ secrets.FB_ACCESS_TOKEN }} 
         run: |
-          # The error came from script.py, so we ensure it runs
-          python script.py
-          python main_script.py
+          # Run the main automation bot
           python run_bot.py

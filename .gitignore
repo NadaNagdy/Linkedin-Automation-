@@ -23,3 +23,8 @@ ENV/
 # OS
 .DS_Store
 Thumbs.db
+
+# Temp / Debug
+debug_*.html
+*.log
+debug_sc.py
