@@ -54,3 +54,5 @@ Fetches latest trends (can be imported or run directly if modified).
 
 ### 4. Post to LinkedIn (`scripts/linkedin_poster.py`)
 Uses the configured token and URN to post content.
+- Supports posting to personal profiles (default).
+- Supports posting to Company Pages by providing the `author_urn` (e.g., `urn:li:organization:123456`).
