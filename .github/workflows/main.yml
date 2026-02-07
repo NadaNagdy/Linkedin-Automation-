@@ -1,4 +1,3 @@
-
 name: Health Trends Auto-Post
 on:
   schedule:
@@ -17,15 +16,23 @@ jobs:
           python-version: '3.9'
       
       - name: Install dependencies
-        run: pip install -r requirements.txt
+        run: |
+          python -m pip install --upgrade pip
+          # Forced installation of facebook-sdk to ensure it's there
+          pip install facebook-sdk openai requests
+          # If you have other specific libs in requirements.txt, keep this:
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
         
       - name: Run Automation Script
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-          # الربط بين اسم الـ Secret في GitHub والاسم في الكود
           LINKEDIN_TOKEN: ${{ secrets.LINKEDIN_TOKEN }} 
           LINKEDIN_PERSON_URN: ${{ secrets.LINKEDIN_PERSON_URN }}
           LINKEDIN_AUTHOR_URN: ${{ secrets.LINKEDIN_AUTHOR_URN }}
+          # Added Facebook secret for the script to use
+          FB_ACCESS_TOKEN: ${{ secrets.FB_ACCESS_TOKEN }} 
         run: |
+          # The error came from script.py, so we ensure it runs
+          python script.py
           python main_script.py
           python run_bot.py
