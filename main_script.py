@@ -34,5 +34,9 @@ def check_linkedin():
             
     return None
 
+import sys
+
 if __name__ == "__main__":
-    check_linkedin()
+    user_id = check_linkedin()
+    if not user_id:
+        sys.exit(1)
