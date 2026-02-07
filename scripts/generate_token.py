@@ -36,6 +36,7 @@ def callback():
         }
         
         try:
+            # LinkedIn expects application/x-www-form-urlencoded, requests sends this by default with 'data='
             response = requests.post(token_url, data=data)
             response.raise_for_status()
             json_response = response.json()
@@ -63,8 +64,11 @@ def main():
     global CLIENT_SECRET
     print("\n--- LinkedIn Token Generator ---")
     
-    # 1. Get Client Secret from User
-    CLIENT_SECRET = input("Enter your LinkedIn Client Secret: ").strip()
+    # 1. Get Client Secret from User or Env
+    CLIENT_SECRET = os.getenv("LINKEDIN_CLIENT_SECRET")
+    if not CLIENT_SECRET:
+        CLIENT_SECRET = input("Enter your LinkedIn Client Secret: ").strip()
+    
     if not CLIENT_SECRET:
         print("❌ Client Secret is required!")
         return
