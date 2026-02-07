@@ -54,7 +54,48 @@ def post_to_linkedin(content, author_urn=None):
     }
     
     try:
-        return requests.post(url, headers=headers, json=post_data, timeout=30)
+        response = requests.post(url, headers=headers, json=post_data, timeout=30)
+        return response, final_author
     except Exception as e:
         print(f"❌ خطأ اتصال: {e}")
+        return None, final_author
+
+def post_comment(object_urn, comment_text, author_urn):
+    """
+    Posts a comment on a LinkedIn share or UGC post.
+    """
+    access_token = os.getenv("LINKEDIN_TOKEN")
+    if not access_token:
+        print("❌ Token missing for comment.")
+        return None
+
+    # URL encode the URN for the endpoint
+    # The endpoint is /socialActions/{urn}/comments
+    # If URN has colons, they might need encoding, but requests usually handles it if passed in URL path correctly?
+    # Actually, LinkedIn API expects the URN as part of the path.
+    # Example: https://api.linkedin.com/v2/socialActions/urn%3Ali%3Ashare%3A123/comments
+    
+    import urllib.parse
+    encoded_urn = urllib.parse.quote(object_urn)
+    url = f"https://api.linkedin.com/v2/socialActions/{encoded_urn}/comments"
+    
+    headers = {
+        "Authorization": f"Bearer {access_token}",
+        "Content-Type": "application/json",
+        "X-Restli-Protocol-Version": "2.0.0"
+    }
+    
+    payload = {
+        "actor": author_urn,
+        "message": {
+            "text": comment_text
+        }
+    }
+    
+    try:
+        print(f"💬 Posting comment on {object_urn} as {author_urn}...")
+        response = requests.post(url, headers=headers, json=payload, timeout=30)
+        return response
+    except Exception as e:
+        print(f"❌ Error posting comment: {e}")
         return None
