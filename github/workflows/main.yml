@@ -1,0 +1,26 @@
+name: Health Trends Auto-Post
+on:
+  schedule:
+    - cron: '0 9 * * *' # يومياً الساعة 9 صباحاً
+  workflow_dispatch: # للتشغيل اليدوي
+
+jobs:
+  build-and-post:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+      
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+        
+      - name: Run Automation Script
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          LINKEDIN_TOKEN: ${{ secrets.LINKEDIN_TOKEN }}
+          LINKEDIN_PERSON_URN: ${{ secrets.LINKEDIN_PERSON_URN }}
+        run: python main_script.py
