@@ -1,17 +1,4 @@
-- name: Get LinkedIn URN
-        env:
-          LINKEDIN_TOKEN: ${{ secrets.LINKEDIN_ACCESS_TOKEN }}
-        run: |
-          python -c "
-          import requests
-          import os
-          token = os.getenv('LINKEDIN_TOKEN')
-          response = requests.get('https://api.linkedin.com/v2/userinfo', headers={'Authorization': f'Bearer {token}'})
-          if response.status_code == 200:
-              print(f'✅ Your Person URN is: {response.json().get(\"sub\")}')
-          else:
-              print(f'❌ Error: {response.status_code} - {response.text}')
-          "
+
 name: Health Trends Auto-Post
 on:
   schedule:
