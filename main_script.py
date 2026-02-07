@@ -2,7 +2,7 @@ import requests
 import os
 from dotenv import load_dotenv
 
-load_dotenv()
+load_dotenv(override=True)
 
 def check_linkedin():
     token = os.getenv("LINKEDIN_TOKEN")

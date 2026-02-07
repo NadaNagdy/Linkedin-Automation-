@@ -2,7 +2,7 @@ import requests
 import os
 from dotenv import load_dotenv
 
-load_dotenv()
+load_dotenv(override=True)
 
 def post_to_linkedin(content, author_urn=None):
     access_token = os.getenv("LINKEDIN_TOKEN")
