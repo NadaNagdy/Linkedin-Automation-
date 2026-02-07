@@ -2,7 +2,7 @@
 name: Health Trends Auto-Post
 on:
   schedule:
-    - cron: '0 9 * * *' # يعمل يومياً الساعة 9 صباحاً بتوقيت جرينتش
+    - cron: '0 6 * * *' # Run daily at 6:00 AM UTC (8:00 AM Cairo)
   workflow_dispatch: # للتشغيل اليدوي للتجربة
 
 jobs:
