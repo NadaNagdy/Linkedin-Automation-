@@ -12,6 +12,8 @@ def post_to_linkedin(content, author_urn=None):
         print("❌ نقص في البيانات: LINKEDIN_TOKEN غير موجود")
         return None
 
+    print(f"🔑 Token in poster: {len(access_token)} chars")
+
     # Determine the author URN
     if author_urn:
         # If the user provided a full URN (e.g. urn:li:organization:123), use it.

@@ -14,6 +14,14 @@ load_dotenv(override=True)
 def main():
     print("🚀 Starting LinkedIn Automation Bot...")
     
+    # Debug Token
+    token = os.getenv("LINKEDIN_TOKEN")
+    if token:
+        print(f"🔑 Token loaded in run_bot.py (Length: {len(token)})")
+        print(f"🔑 Token start: {token[:4]}...")
+    else:
+        print("❌ Token is NONE in run_bot.py")
+
     # 1. Fetch Trends
     print("🔍 Fetching latest trends...")
     trends = fetch_trends()
