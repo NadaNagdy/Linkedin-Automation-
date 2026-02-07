@@ -57,3 +57,14 @@ Fetches latest trends (can be imported or run directly if modified).
 Uses the configured token and URN to post content.
 - Supports posting to personal profiles (default).
 - Supports posting to Company Pages by providing the `author_urn` (e.g., `urn:li:organization:123456`).
+
+### 5. Run Full Automation (`run_bot.py`)
+The main script that orchestrates the entire flow:
+1.  Fetches trends using `scraper.py`.
+2.  Formats a post.
+3.  Posts to LinkedIn using `linkedin_poster.py`.
+
+```bash
+python3 run_bot.py
+```
+*To post to a Company Page automatically, set `LINKEDIN_AUTHOR_URN` in your environment or GitHub Secrets.*
