@@ -2,6 +2,7 @@ import requests
 from bs4 import BeautifulSoup
 import logging
 from datetime import datetime
+import random
 
 # Set up logging
 logging.basicConfig(
@@ -10,16 +11,22 @@ logging.basicConfig(
 )
 
 def get_headers():
+    # Rotate user agents to avoid detection
+    user_agents = [
+        'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
+        'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36'
+    ]
     return {
-        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'User-Agent': random.choice(user_agents),
         'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
         'Accept-Language': 'en-US,en;q=0.9',
-        'Accept-Encoding': 'gzip, deflate, br'
+        'Accept-Encoding': 'gzip, deflate, br',
+        'Referer': 'https://www.google.com/'
     }
 
-def scrape_wuzzuf_jobs(query="medical", category="Jobs"):
+def scrape_wuzzuf_jobs(query="medical", category="Job"):
     """Scrapes jobs/internships from Wuzzuf."""
-    # Assuming Wuzzuf search works similarly for internships or just keyword based
     url = f"https://wuzzuf.net/search/jobs/?q={query.replace(' ', '+')}&a=hpb"
     print(f"Scraping Wuzzuf ({category}): {url}")
     try:
@@ -28,7 +35,6 @@ def scrape_wuzzuf_jobs(query="medical", category="Jobs"):
         soup = BeautifulSoup(response.content, 'html.parser')
         
         jobs = []
-        # Selectors based on debug analysis
         job_cards = soup.find_all('div', class_='css-ghe2tq')
         
         if not job_cards:
@@ -49,13 +55,17 @@ def scrape_wuzzuf_jobs(query="medical", category="Jobs"):
 
                 full_link = link if link.startswith('http') else f"https://wuzzuf.net{link}"
                 
+                # Check for "Just now", "Today", or "1 hour ago" to prioritize new items
+                is_fresh = any(x in date_posted.lower() for x in ["now", "hour", "today", "minute"])
+                
                 jobs.append({
-                    'title': f"[{category}] {title}", # Prefix title with category
+                    'title': f"[{category}] {title}", 
                     'company': company,
                     'location': location,
                     'link': full_link,
                     'date_posted': date_posted,
-                    'source': 'Wuzzuf'
+                    'source': 'Wuzzuf',
+                    'is_fresh': is_fresh
                 })
                 
         logging.info(f"Scraped {len(jobs)} {category} from Wuzzuf")
@@ -64,7 +74,7 @@ def scrape_wuzzuf_jobs(query="medical", category="Jobs"):
         logging.error(f"Error scraping Wuzzuf ({category}): {str(e)}")
         return []
 
-def scrape_reliefweb_jobs(query="health", category="Jobs"):
+def scrape_reliefweb_jobs(query="health", category="Job"):
     """Scrapes jobs/internships from ReliefWeb."""
     url = f"https://reliefweb.int/jobs?search={query.replace(' ', '+')}"
     print(f"Scraping ReliefWeb ({category}): {url}")
@@ -95,7 +105,8 @@ def scrape_reliefweb_jobs(query="health", category="Jobs"):
                     'location': location,
                     'link': link,
                     'date_posted': date_posted,
-                    'source': 'ReliefWeb'
+                    'source': 'ReliefWeb',
+                    'is_fresh': True # ReliefWeb sorts by date usually
                 })
         
         logging.info(f"Scraped {len(jobs)} {category} from ReliefWeb")
@@ -131,7 +142,8 @@ def scrape_scholarships(query="medical"):
                     'location': "See Details",
                     'link': link,
                     'date_posted': date_posted,
-                    'source': 'ScholarshipsAds'
+                    'source': 'ScholarshipsAds',
+                    'is_fresh': True
                 })
                 
         logging.info(f"Scraped {len(scholarships)} scholarships from ScholarshipsAds")
@@ -168,7 +180,8 @@ def scrape_ahram_health(url="https://english.ahram.org.eg/Portal/54/0/Health.asp
                         'location': "Egypt",
                         'link': href,
                         'date_posted': datetime.now().strftime("%Y-%m-%d"),
-                        'source': 'Ahram Online'
+                        'source': 'Ahram Online',
+                        'is_fresh': False # Can't determine freshness easily
                     })
                     count += 1
         return news
@@ -181,7 +194,6 @@ def scrape_internships(query="internship"):
     print(f"🔎 Scraping Internships with query: {query}")
     internships = []
     
-    # Reuse job scrapers with internship query
     internships.extend(scrape_wuzzuf_jobs(query, category="Internship"))
     internships.extend(scrape_reliefweb_jobs(query, category="Internship"))
     
@@ -219,7 +231,6 @@ def scrape_opportunities(queries=None):
     if q_intern:
         all_opportunities.extend(scrape_internships(q_intern))
     else:
-        # Default internship query
         all_opportunities.extend(scrape_internships("medical internship"))
 
     # Ahram
@@ -230,9 +241,3 @@ def scrape_opportunities(queries=None):
         all_opportunities.extend(scrape_ahram_health())
     
     return all_opportunities
-
-if __name__ == "__main__":
-    results = scrape_opportunities()
-    print(f"\nTotal Results: {len(results)}")
-    for item in results:
-        print(f"- [{item['source']}] {item['title']}")

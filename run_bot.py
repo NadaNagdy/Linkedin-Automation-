@@ -1,6 +1,7 @@
 import sys
 import os
 import json
+import random
 from dotenv import load_dotenv
 
 # Add scripts directory to path
@@ -47,29 +48,43 @@ def main():
     
     # 2. Fetch Opportunities
     print("🔍 Fetching opportunities...")
-    # PASSING CONFIG QUERIES HERE
     opportunities = scrape_opportunities(queries=search_queries)
     
+    combined_content = []
+    
+    # Prioritize "Fresh" opportunities
     if opportunities:
         print(f"✅ Found {len(opportunities)} new opportunities.")
-        # Combine trends and opportunities
-        if trends:
-            trends.extend(opportunities)
-        else:
-            trends = opportunities
+        fresh_opps = [op for op in opportunities if op.get('is_fresh')]
+        other_opps = [op for op in opportunities if not op.get('is_fresh')]
+        
+        print(f"🔥 Fresh Opportunities: {len(fresh_opps)}")
+        
+        # Add fresh opportunities first
+        combined_content.extend(fresh_opps)
+        # Then others
+        combined_content.extend(other_opps)
     
-    if not trends:
+    # Add trends at the end (lower priority if opportunities exist)
+    if trends:
+        combined_content.extend(trends)
+    
+    if not combined_content:
         print("⚠️ No content found to post. Exiting.")
         return
 
-    print(f"✅ Total items available: {len(trends)}")
+    print(f"✅ Total items available: {len(combined_content)}")
 
     # 3. Select Content & Generate Post
-    selected_article = trends[0] 
+    # Pick the first fresh item, or random if they are all similar priority?
+    # For now, pick the first one which is likely the freshest opportunity.
+    selected_article = combined_content[0] 
+    
     article_title = selected_article.get("title", "Unknown Title")
     article_url = selected_article.get("link") or selected_article.get("url", "")
+    source = selected_article.get("source", "Trend")
     
-    print(f"🎯 Selected Content: {article_title}")
+    print(f"🎯 Selected Content: {article_title} ({source})")
     print(f"🔗 URL: {article_url}")
 
     openai_api_key = os.getenv("OPENAI_API_KEY")
