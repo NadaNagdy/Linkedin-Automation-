@@ -28,6 +28,7 @@ A Python-based automation tool to scrape trending health/tech news and post them
    LINKEDIN_TOKEN=your_access_token_here
    LINKEDIN_PERSON_URN=your_person_urn_here
    ```
+   *Note: The project uses `python-dotenv` to automatically load these variables.*
 
    > **Note**: You can find your credentials using the helper scripts below.
 
