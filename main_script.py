@@ -1,9 +1,12 @@
 import os
-import openai
+from openai import OpenAI  # التغيير هنا في طريقة الاستدعاء
 from scripts.scraper import fetch_trends
 from scripts.linkedin_poster import post_to_linkedin
 
-openai.api_key = os.getenv("OPENAI_API_KEY")
+# إعداد العميل (Client) بالطريقة الجديدة
+client = OpenAI(
+    api_key=os.getenv("OPENAI_API_KEY")
+)
 
 def main():
     print("جاري البحث عن قصص علمية جديدة...")
@@ -13,7 +16,7 @@ def main():
         print("لم يتم العثور على أخبار اليوم.")
         return
 
-    # الـ Prompt المصمم ليكون مدرس مطلع وحكواتي
+    # الـ Prompt المصمم بأسلوب المدرس الحكواتي
     prompt = f"""
     بصفتك مدرساً واسع الاطلاع، ومبدعاً في تقريب العلوم للواقع.. 
     اكتب مقالاً لـ LinkedIn بالعربية حول هذه التطورات:
@@ -28,10 +31,13 @@ def main():
     """
 
     try:
-        response = openai.ChatCompletion.create(
+        # التغيير هنا في طريقة طلب التوليد (v1.0.0+)
+        response = client.chat.completions.create(
             model="gpt-3.5-turbo",
-            messages=[{"role": "system", "content": "أنت مدرس مطلع ومبسط للعلوم بأسلوب قصصي ملهم."},
-                      {"role": "user", "content": prompt}]
+            messages=[
+                {"role": "system", "content": "أنت مدرس مطلع ومبسط للعلوم بأسلوب قصصي ملهم."},
+                {"role": "user", "content": prompt}
+            ]
         )
         article = response.choices[0].message.content
         
@@ -43,7 +49,7 @@ def main():
             print(f"خطأ في النشر: {result.text}")
             
     except Exception as e:
-        print(f"حدث خطأ: {e}")
+        print(f"حدث خطأ أثناء التوليد أو النشر: {e}")
 
 if __name__ == "__main__":
     main()
