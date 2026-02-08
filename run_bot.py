@@ -76,13 +76,13 @@ def main():
     print(f"✅ Total items available: {len(combined_content)}")
 
     # 3. Select Content & Generate Post
-    # Pick the first fresh item, or random if they are all similar priority?
-    # For now, pick the first one which is likely the freshest opportunity.
     selected_article = combined_content[0] 
     
     article_title = selected_article.get("title", "Unknown Title")
     article_url = selected_article.get("link") or selected_article.get("url", "")
     source = selected_article.get("source", "Trend")
+    company = selected_article.get("company", "N/A")
+    location = selected_article.get("location", "N/A")
     
     print(f"🎯 Selected Content: {article_title} ({source})")
     print(f"🔗 URL: {article_url}")
@@ -96,11 +96,20 @@ def main():
             from openai import OpenAI
             client = OpenAI(api_key=openai_api_key)
             
-            system_role = prompts.get("system_role", "You are a helpful assistant.")
-            user_prompt_template = prompts.get("content_generation", "Summarize this: '{article_title}'")
+            system_role = prompts.get("system_role", "You are a friendly, helpful colleague.")
             
-            # Format the prompt with the article title
-            prompt = user_prompt_template.replace("{article_title}", article_title)
+            # Determine if it's an opportunity or a trend/article
+            is_opportunity = source in ['Wuzzuf', 'ReliefWeb', 'ScholarshipsAds', 'Internships'] or \
+                             any(k in article_title.lower() for k in ['job', 'internship', 'scholarship'])
+            
+            if is_opportunity:
+                 user_prompt_template = prompts.get("opportunity_generation", "Write a post about this opportunity: {title}")
+                 prompt = user_prompt_template.replace("{title}", article_title)\
+                                              .replace("{company}", company)\
+                                              .replace("{location}", location)
+            else:
+                 user_prompt_template = prompts.get("content_generation", "Summarize this: '{article_title}'")
+                 prompt = user_prompt_template.replace("{article_title}", article_title)
             
             completion = client.chat.completions.create(
                 model=settings.get("openai_model", "gpt-3.5-turbo"),
@@ -115,7 +124,10 @@ def main():
             # Construct hashtags
             hashtags = " ".join(posting_config.get("hashtags", ["#Tech", "#News"]))
             
-            post_content = f"🎓 **Update / تحديث**\n\n{ai_text}\n\n{hashtags}"
+            if is_opportunity:
+                post_content = f"🚀 **New Opportunity / فرصة جديدة**\n\n{ai_text}\n\n{hashtags}"
+            else:
+                post_content = f"🎓 **Update / تحديث**\n\n{ai_text}\n\n{hashtags}"
             
         except Exception as e:
             print(f"❌ OpenAI Error: {e}")
@@ -144,7 +156,11 @@ def main():
         # 5. Post Comment with Link
         if article_url and final_author:
             print("💬 Adding link in comments...")
-            comment_text = f"🔗 Read the full details here: {article_url}"
+            comment_text = f"🔗 Link: {article_url}"
+             # If opportunity, emphasize applying
+            if source in ['Wuzzuf', 'ReliefWeb', 'ScholarshipsAds', 'Internships']:
+                 comment_text = f"🚀 للتقديم / Apply here: {article_url}"
+            
             post_comment(post_id, comment_text, final_author)
             
     else:
