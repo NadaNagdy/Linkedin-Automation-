@@ -10,7 +10,7 @@ def post_to_linkedin(content, author_urn=None):
     
     if not access_token:
         print("❌ نقص في البيانات: LINKEDIN_TOKEN غير موجود")
-        return None
+        return None, None
 
     print(f"🔑 Token in poster: {len(access_token)} chars")
 
@@ -30,7 +30,7 @@ def post_to_linkedin(content, author_urn=None):
         final_author = f"urn:li:person:{default_person_urn}"
     else:
         print("❌ نقص في البيانات: LINKEDIN_PERSON_URN أو author_urn غير موجود")
-        return None
+        return None, None
 
     print(f"🚀 Author URN: {final_author}")
 
