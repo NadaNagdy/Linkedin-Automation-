@@ -76,8 +76,20 @@ def main():
     print(f"✅ Total items available: {len(combined_content)}")
 
     # 3. Select Content & Generate Post
-    # Pick a random article to avoid duplicate post errors
-    selected_article = random.choice(combined_content) 
+    post_type = None
+    if "--type=research" in sys.argv:
+        post_type = "research"
+    elif "--type=opportunity" in sys.argv:
+        post_type = "opportunity"
+
+    if post_type == "research" and trends:
+        selected_article = random.choice(trends)
+    elif post_type == "opportunity" and combined_content:
+        opps = [item for item in combined_content if item not in trends]
+        selected_article = random.choice(opps) if opps else random.choice(combined_content)
+    else:
+        # Fallback to random if type not specified or list empty
+        selected_article = random.choice(combined_content)
     
     article_title = selected_article.get("title", "Unknown Title")
     article_url = selected_article.get("link") or selected_article.get("url", "")

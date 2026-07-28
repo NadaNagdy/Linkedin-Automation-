@@ -1,8 +1,14 @@
 name: Health Trends Auto-Post
 on:
-  workflow_dispatch: 
+  workflow_dispatch:
+    inputs:
+      post_type:
+        description: 'Post Type (research or opportunity)'
+        required: false
+        default: 'research'
   schedule:
-    - cron: '0 10 * * *' # Runs at 10:00 AM UTC every day
+    - cron: '0 6 * * *'  # 6:00 AM UTC (9:00 AM Cairo Time) - High views for Research
+    - cron: '0 13 * * *' # 1:00 PM UTC (4:00 PM Cairo Time) - High views for Opportunities
 
 jobs:
   build-and-post:
@@ -30,6 +36,18 @@ jobs:
           FB_ACCESS_TOKEN: ${{ secrets.FB_ACCESS_TOKEN }} 
         run: |
           echo "Debug: Token length is ${#LINKEDIN_TOKEN}"
-          echo "Debug: URN length is ${#LINKEDIN_PERSON_URN}"
-          # Run the main automation bot
-          python run_bot.py
+          
+          # GitHub Actions runs in UTC. 
+          HOUR=$(date +%H)
+          
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            TYPE="${{ github.event.inputs.post_type }}"
+            echo "Manual trigger for type: $TYPE"
+            python run_bot.py --type=$TYPE
+          elif [ "$HOUR" = "06" ] || [ "$HOUR" = "6" ]; then
+            echo "Scheduled trigger for Research (9 AM Local time)"
+            python run_bot.py --type=research
+          else
+            echo "Scheduled trigger for Opportunity (4 PM Local time)"
+            python run_bot.py --type=opportunity
+          fi
