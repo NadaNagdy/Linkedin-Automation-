@@ -7,7 +7,7 @@ import urllib.parse
 app = Flask(__name__)
 
 # --- Configuration (Defaults from config.js) ---
-CLIENT_ID = "77n8awe98j70ci"
+CLIENT_ID = os.getenv("LINKEDIN_CLIENT_ID", "77n8awe98j70ci")
 REDIRECT_URI = "http://localhost:5500/callback.html" 
 SCOPE = "openid profile email w_member_social r_organization_social w_organization_social"
 
@@ -61,8 +61,12 @@ def callback():
     return "<h1>No code received.</h1>"
 
 def main():
-    global CLIENT_SECRET
+    global CLIENT_SECRET, CLIENT_ID
     print("\n--- LinkedIn Token Generator ---")
+    
+    client_id_input = input(f"Enter your LinkedIn Client ID (press Enter to keep default '{CLIENT_ID}'): ").strip()
+    if client_id_input:
+        CLIENT_ID = client_id_input
     
     # 1. Get Client Secret from User or Env
     CLIENT_SECRET = os.getenv("LINKEDIN_CLIENT_SECRET")

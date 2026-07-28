@@ -76,7 +76,8 @@ def main():
     print(f"✅ Total items available: {len(combined_content)}")
 
     # 3. Select Content & Generate Post
-    selected_article = combined_content[0] 
+    # Pick a random article to avoid duplicate post errors
+    selected_article = random.choice(combined_content) 
     
     article_title = selected_article.get("title", "Unknown Title")
     article_url = selected_article.get("link") or selected_article.get("url", "")
@@ -127,7 +128,7 @@ def main():
             if is_opportunity:
                 post_content = f"🚀 **New Opportunity / فرصة جديدة**\n\n{ai_text}\n\n{hashtags}"
             else:
-                post_content = f"🎓 **Update / تحديث**\n\n{ai_text}\n\n{hashtags}"
+                post_content = f"🎓 **Global Insights / رؤى عالمية**\n\n{ai_text}\n\n{hashtags}"
             
         except Exception as e:
             print(f"❌ OpenAI Error: {e}")
@@ -165,7 +166,7 @@ def main():
             
     else:
         print("❌ Failed to post.")
-        if response:
+        if response is not None:
             print(f"Status Code: {response.status_code}")
             print(f"Response: {response.text}")
         sys.exit(1)
