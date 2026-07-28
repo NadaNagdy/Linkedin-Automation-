@@ -6,7 +6,9 @@ load_dotenv(override=True)
 
 def post_to_linkedin(content, author_urn=None):
     access_token = os.getenv("LINKEDIN_TOKEN")
+    if access_token: access_token = access_token.strip()
     default_person_urn = os.getenv("LINKEDIN_PERSON_URN")
+    if default_person_urn: default_person_urn = default_person_urn.strip()
     
     if not access_token:
         print("❌ نقص في البيانات: LINKEDIN_TOKEN غير موجود")
@@ -16,6 +18,7 @@ def post_to_linkedin(content, author_urn=None):
 
     # Determine the author URN
     if author_urn:
+        author_urn = author_urn.strip()
         # If the user provided a full URN (e.g. urn:li:organization:123), use it.
         # If they provided just an ID, we might need to know if it's person or organization.
         # For simplicity, let's assume if it doesn't start with 'urn:', we default to person? 
@@ -65,6 +68,7 @@ def post_comment(object_urn, comment_text, author_urn):
     Posts a comment on a LinkedIn share or UGC post.
     """
     access_token = os.getenv("LINKEDIN_TOKEN")
+    if access_token: access_token = access_token.strip()
     if not access_token:
         print("❌ Token missing for comment.")
         return None
