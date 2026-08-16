@@ -181,7 +181,12 @@ def main():
         if response is not None:
             print(f"Status Code: {response.status_code}")
             print(f"Response: {response.text}")
-        sys.exit(1)
+        # Exit with code 1 only if LinkedIn token is clearly invalid (401)
+        if response is not None and response.status_code == 401:
+            print("🔑 Token is expired or invalid. Please regenerate your LinkedIn token.")
+            sys.exit(1)
+        # For other errors (duplicate post, etc.) don't crash the workflow
+        sys.exit(0)
 
 if __name__ == "__main__":
     main()
