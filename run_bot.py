@@ -147,7 +147,7 @@ def main():
             ai_text = completion.choices[0].message.content.strip()
             
             # Construct hashtags
-            hashtags = " ".join(posting_config.get("hashtags", ["#Tech", "#News"]))
+            hashtags = "\n".join(posting_config.get("hashtags", ["#Tech", "#News"]))
             
             if is_conference:
                 post_content = f"📅 **Upcoming Conference / مؤتمر قادم**\n\n{ai_text}\n\n{hashtags}"
