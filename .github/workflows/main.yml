@@ -3,12 +3,13 @@ on:
   workflow_dispatch:
     inputs:
       post_type:
-        description: 'Post Type (research or opportunity)'
+        description: 'Post Type (research, opportunity, conference)'
         required: false
         default: 'research'
   schedule:
     - cron: '0 6 * * *'  # 6:00 AM UTC (9:00 AM Cairo Time) - High views for Research
     - cron: '0 13 * * *' # 1:00 PM UTC (4:00 PM Cairo Time) - High views for Opportunities
+    - cron: '0 17 * * *' # 5:00 PM UTC (8:00 PM Cairo Time) - High views for Conferences
 
 jobs:
   build-and-post:
@@ -47,6 +48,9 @@ jobs:
           elif [ "$HOUR" = "06" ] || [ "$HOUR" = "6" ]; then
             echo "Scheduled trigger for Research (9 AM Local time)"
             python run_bot.py --type=research
+          elif [ "$HOUR" = "17" ]; then
+            echo "Scheduled trigger for Conference (8 PM Local time)"
+            python run_bot.py --type=conference
           else
             echo "Scheduled trigger for Opportunity (4 PM Local time)"
             python run_bot.py --type=opportunity

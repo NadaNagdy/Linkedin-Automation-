@@ -9,7 +9,7 @@ sys.path.append(os.path.join(os.getcwd(), 'scripts'))
 
 from scraper import fetch_trends
 from linkedin_poster import post_to_linkedin, post_comment
-from opportunity_scraper import scrape_opportunities 
+from opportunity_scraper import scrape_opportunities, scrape_medical_conferences 
 
 # Load environment variables
 load_dotenv(override=True)
@@ -49,6 +49,7 @@ def main():
     # 2. Fetch Opportunities
     print("🔍 Fetching opportunities...")
     opportunities = scrape_opportunities(queries=search_queries)
+    conferences = scrape_medical_conferences()
     
     combined_content = []
     
@@ -81,15 +82,20 @@ def main():
         post_type = "research"
     elif "--type=opportunity" in sys.argv:
         post_type = "opportunity"
+    elif "--type=conference" in sys.argv:
+        post_type = "conference"
 
     if post_type == "research" and trends:
         selected_article = random.choice(trends)
+    elif post_type == "conference" and conferences:
+        selected_article = random.choice(conferences)
     elif post_type == "opportunity" and combined_content:
         opps = [item for item in combined_content if item not in trends]
         selected_article = random.choice(opps) if opps else random.choice(combined_content)
     else:
         # Fallback to random if type not specified or list empty
-        selected_article = random.choice(combined_content)
+        all_options = combined_content + conferences
+        selected_article = random.choice(all_options) if all_options else {}
     
     article_title = selected_article.get("title", "Unknown Title")
     article_url = selected_article.get("link") or selected_article.get("url", "")
@@ -112,10 +118,16 @@ def main():
             system_role = prompts.get("system_role", "You are a friendly, helpful colleague.")
             
             # Determine if it's an opportunity or a trend/article
-            is_opportunity = source in ['Wuzzuf', 'ReliefWeb', 'ScholarshipsAds', 'Internships'] or \
-                             any(k in article_title.lower() for k in ['job', 'internship', 'scholarship'])
+            is_conference = '[Conference]' in article_title or source == 'WHO'
+            is_opportunity = (source in ['Wuzzuf', 'ReliefWeb', 'ScholarshipsAds', 'Internships'] or \
+                             any(k in article_title.lower() for k in ['job', 'internship', 'scholarship'])) and not is_conference
             
-            if is_opportunity:
+            if is_conference:
+                 user_prompt_template = prompts.get("conference_generation", "Write a post about this conference: {title}")
+                 prompt = user_prompt_template.replace("{title}", article_title)\
+                                              .replace("{company}", company)\
+                                              .replace("{location}", location)
+            elif is_opportunity:
                  user_prompt_template = prompts.get("opportunity_generation", "Write a post about this opportunity: {title}")
                  prompt = user_prompt_template.replace("{title}", article_title)\
                                               .replace("{company}", company)\
@@ -137,7 +149,9 @@ def main():
             # Construct hashtags
             hashtags = " ".join(posting_config.get("hashtags", ["#Tech", "#News"]))
             
-            if is_opportunity:
+            if is_conference:
+                post_content = f"📅 **Upcoming Conference / مؤتمر قادم**\n\n{ai_text}\n\n{hashtags}"
+            elif is_opportunity:
                 post_content = f"🚀 **New Opportunity / فرصة جديدة**\n\n{ai_text}\n\n{hashtags}"
             else:
                 post_content = f"🎓 **Global Insights / رؤى عالمية**\n\n{ai_text}\n\n{hashtags}"
@@ -173,6 +187,8 @@ def main():
              # If opportunity, emphasize applying
             if source in ['Wuzzuf', 'ReliefWeb', 'ScholarshipsAds', 'Internships']:
                  comment_text = f"🚀 للتقديم / Apply here: {article_url}"
+            elif source == 'WHO':
+                 comment_text = f"📅 للتسجيل والمشاركة / Register here: {article_url}"
             
             post_comment(post_id, comment_text, final_author)
             
