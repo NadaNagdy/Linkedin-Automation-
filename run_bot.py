@@ -90,7 +90,6 @@ def main():
     if post_type == "tool":
         tools = config.get("research_tools", [])
         if tools:
-            import random
             selected_tool = random.choice(tools)
             selected_article = {"title": selected_tool["name"], "source": "Tool", "company": selected_tool["description"], "url": ""}
         else:
@@ -129,8 +128,9 @@ def main():
             
             # Determine if it's an opportunity or a trend/article
             is_conference = '[Conference]' in article_title or source == 'WHO'
+            is_tool = source == 'Tool'
             is_opportunity = (source in ['Wuzzuf', 'ReliefWeb', 'ScholarshipsAds', 'Internships'] or \
-                             any(k in article_title.lower() for k in ['job', 'internship', 'scholarship'])) and not is_conference
+                             any(k in article_title.lower() for k in ['job', 'internship', 'scholarship'])) and not is_conference and not is_tool
             
             if is_tool:
                  user_prompt_template = prompts.get("tool_generation", "Write about this tool: {title}")
