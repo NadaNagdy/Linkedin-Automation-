@@ -8,6 +8,7 @@ on:
         default: 'research'
   schedule:
     - cron: '0 7 * * *'  # 7:00 AM UTC (10:00 AM Cairo Time) - High views for Research
+    - cron: '15 9 * * *'  # 9:15 AM UTC (12:15 PM Cairo Time) - Tools & Databases
     - cron: '15 13 * * *' # 1:15 PM UTC (4:15 PM Cairo Time) - High views for Opportunities
     - cron: '15 17 * * *' # 5:15 PM UTC (8:15 PM Cairo Time) - High views for Conferences
 
@@ -48,6 +49,9 @@ jobs:
           elif [ "$HOUR" = "07" ] || [ "$HOUR" = "7" ]; then
             echo "Scheduled trigger for Research (10 AM Local time)"
             python run_bot.py --type=research
+          elif [ "$HOUR" = "09" ] || [ "$HOUR" = "9" ]; then
+            echo "Scheduled trigger for Tool (12:15 PM Local time)"
+            python run_bot.py --type=tool
           elif [ "$HOUR" = "17" ]; then
             echo "Scheduled trigger for Conference (8 PM Local time)"
             python run_bot.py --type=conference

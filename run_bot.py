@@ -84,8 +84,18 @@ def main():
         post_type = "opportunity"
     elif "--type=conference" in sys.argv:
         post_type = "conference"
+    elif "--type=tool" in sys.argv:
+        post_type = "tool"
 
-    if post_type == "research" and trends:
+    if post_type == "tool":
+        tools = config.get("research_tools", [])
+        if tools:
+            import random
+            selected_tool = random.choice(tools)
+            selected_article = {"title": selected_tool["name"], "source": "Tool", "company": selected_tool["description"], "url": ""}
+        else:
+            selected_article = {}
+    elif post_type == "research" and trends:
         selected_article = random.choice(trends)
     elif post_type == "conference" and conferences:
         selected_article = random.choice(conferences)
@@ -122,7 +132,11 @@ def main():
             is_opportunity = (source in ['Wuzzuf', 'ReliefWeb', 'ScholarshipsAds', 'Internships'] or \
                              any(k in article_title.lower() for k in ['job', 'internship', 'scholarship'])) and not is_conference
             
-            if is_conference:
+            if is_tool:
+                 user_prompt_template = prompts.get("tool_generation", "Write about this tool: {title}")
+                 prompt = user_prompt_template.replace("{title}", article_title)\
+                                              .replace("{description}", company)
+            elif is_conference:
                  user_prompt_template = prompts.get("conference_generation", "Write a post about this conference: {title}")
                  prompt = user_prompt_template.replace("{title}", article_title)\
                                               .replace("{company}", company)\
