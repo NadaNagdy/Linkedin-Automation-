@@ -68,3 +68,4 @@ The main script that orchestrates the entire flow:
 python3 run_bot.py
 ```
 *To post to a Company Page automatically, set `LINKEDIN_AUTHOR_URN` in your environment or GitHub Secrets.*
+
