@@ -2,7 +2,7 @@ name: Auto-Post Tool
 on:
   workflow_dispatch:
   schedule:
-    - cron: '15 9 * * *'
+    - cron: '23 9 * * *'
 
 jobs:
   build-and-post:

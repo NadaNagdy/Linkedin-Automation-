@@ -2,7 +2,7 @@ name: Auto-Post Opportunity
 on:
   workflow_dispatch:
   schedule:
-    - cron: '15 13 * * *'
+    - cron: '27 13 * * *'
 
 jobs:
   build-and-post:

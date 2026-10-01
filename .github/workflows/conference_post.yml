@@ -2,7 +2,7 @@ name: Auto-Post Conference
 on:
   workflow_dispatch:
   schedule:
-    - cron: '15 17 * * *'
+    - cron: '31 17 * * *'
 
 jobs:
   build-and-post:
