@@ -59,15 +59,17 @@ def main():
         url = item.get("link") or item.get("url") or item.get("name", "")
         return url not in posted_urls
 
-    if trends: trends = [t for t in trends if is_unposted(t)]
-    if opportunities: opportunities = [o for o in opportunities if is_unposted(o)]
-    if conferences: conferences = [c for c in conferences if is_unposted(c)]
+
     
     # 2. Fetch Opportunities
 
     print("🔍 Fetching opportunities...")
     opportunities = scrape_opportunities(queries=search_queries)
     conferences = scrape_medical_conferences()
+
+    if trends: trends = [t for t in trends if is_unposted(t)]
+    if opportunities: opportunities = [o for o in opportunities if is_unposted(o)]
+    if conferences: conferences = [c for c in conferences if is_unposted(c)]
     
     combined_content = []
     
