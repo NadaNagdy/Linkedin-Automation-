@@ -46,7 +46,25 @@ def main():
     print("🔍 Fetching latest trends...")
     trends = fetch_trends()
     
+
+    # Load history
+    history_file = "history.json"
+    try:
+        with open(history_file, "r") as hf:
+            posted_urls = json.load(hf)
+    except (FileNotFoundError, json.JSONDecodeError):
+        posted_urls = []
+
+    def is_unposted(item):
+        url = item.get("link") or item.get("url") or item.get("name", "")
+        return url not in posted_urls
+
+    if trends: trends = [t for t in trends if is_unposted(t)]
+    if opportunities: opportunities = [o for o in opportunities if is_unposted(o)]
+    if conferences: conferences = [c for c in conferences if is_unposted(c)]
+    
     # 2. Fetch Opportunities
+
     print("🔍 Fetching opportunities...")
     opportunities = scrape_opportunities(queries=search_queries)
     conferences = scrape_medical_conferences()
@@ -87,11 +105,14 @@ def main():
     elif "--type=tool" in sys.argv:
         post_type = "tool"
 
+
     if post_type == "tool":
         tools = config.get("research_tools", [])
+        tools = [t for t in tools if t.get("name") not in posted_urls]
         if tools:
             selected_tool = random.choice(tools)
             selected_article = {"title": selected_tool["name"], "source": "Tool", "company": selected_tool["description"], "url": ""}
+
         else:
             selected_article = {}
     elif post_type == "research" and trends:
@@ -106,8 +127,14 @@ def main():
         all_options = combined_content + conferences
         selected_article = random.choice(all_options) if all_options else {}
     
-    article_title = selected_article.get("title", "Unknown Title")
+
+    article_title = selected_article.get("title")
+    if not article_title:
+        print("⚠️ No fresh content available for this post type! Everything has already been posted.")
+        sys.exit(0)
+    
     article_url = selected_article.get("link") or selected_article.get("url", "")
+
     source = selected_article.get("source", "Trend")
     company = selected_article.get("company", "N/A")
     location = selected_article.get("location", "N/A")
@@ -194,6 +221,7 @@ def main():
         post_id = response.json().get('id')
         print(f"Post ID: {post_id}")
         
+
         # 5. Post Comment with Link
         if article_url and final_author:
             print("💬 Adding link in comments...")
@@ -205,6 +233,12 @@ def main():
                  comment_text = f"📅 للتسجيل والمشاركة / Register here: {article_url}"
             
             post_comment(post_id, comment_text, final_author)
+            
+        # Save to history
+        posted_urls.append(article_url or article_title)
+        with open(history_file, "w") as hf:
+            json.dump(posted_urls, hf)
+
             
     else:
         print("❌ Failed to post.")
