@@ -6,10 +6,10 @@ def fetch_trends():
     
     # 1. سحب أخبار من TechCrunch Health
     try:
-        tc_url = "https://techcrunch.com/category/health/"
+        tc_url = "https://techcrunch.com/category/biotech-health/"
         res = requests.get(tc_url, timeout=10)
         soup = BeautifulSoup(res.text, 'html.parser')
-        articles = soup.find_all('h2', class_='loop-card__title', limit=3)
+        articles = soup.find_all('h3', class_='loop-card__title', limit=3)
         for a in articles:
             title = a.text.strip()
             link_tag = a.find('a')

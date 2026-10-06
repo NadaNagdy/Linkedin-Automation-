@@ -4,6 +4,9 @@ on:
   schedule:
     - cron: '23 9 * * *'
 
+permissions:
+  contents: write
+
 jobs:
   build-and-post:
     runs-on: ubuntu-latest
