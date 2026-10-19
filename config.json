@@ -73,6 +73,66 @@
         {
             "name": "JSTOR",
             "description": "Excellent for searching within humanities, social sciences, and history related to medical sociology."
+        },
+        {
+            "name": "PubMed Central (PMC)",
+            "description": "A free full-text archive of biomedical and life sciences journal literature at the U.S. National Institutes of Health (NIH)."
+        },
+        {
+            "name": "Scopus",
+            "description": "Elsevier's comprehensive abstract and citation database covering thousands of peer-reviewed journals, books, and conference proceedings in medicine and science."
+        },
+        {
+            "name": "Web of Science",
+            "description": "A premier global citation database providing standardized, multidisciplinary citation index data for academic and clinical research."
+        },
+        {
+            "name": "ClinicalTrials.gov",
+            "description": "A web-based resource that provides researchers, patients, and healthcare professionals with access to clinical studies on a wide range of diseases and conditions."
+        },
+        {
+            "name": "UpToDate",
+            "description": "A premier evidence-based clinical decision support resource used worldwide by clinicians to make the right point-of-care decisions."
+        },
+        {
+            "name": "BioMed Central (BMC)",
+            "description": "An open access publisher with a large portfolio of peer-reviewed journals sharing discoveries in science, technology, engineering, and medicine."
+        },
+        {
+            "name": "PLOS ONE",
+            "description": "A multidisciplinary open access journal publishing rigorous, peer-reviewed primary research across all areas of science and medicine."
+        },
+        {
+            "name": "Rayyan",
+            "description": "An intelligent systematic reviews web application that accelerates title and abstract screening using machine learning and collaborative tools."
+        },
+        {
+            "name": "Covidence",
+            "description": "The standard systematic review management tool trusted by Cochrane reviewers for screening, data extraction, and risk of bias assessment."
+        },
+        {
+            "name": "Consensus AI",
+            "description": "An AI-powered academic search engine that extracts findings directly from scientific research to provide evidence-based consensus answers."
+        },
+        {
+            "name": "Elicit",
+            "description": "An AI research assistant that analyzes academic papers, finds relevant literature without exact keyword matches, and extracts key claims."
+        },
+        {
+            "name": "Connected Papers",
+            "description": "A visual tool that analyzes co-citations and bibliographic coupling to generate graphical maps of related academic papers in your specialty."
+        },
+        {
+            "name": "Scite.ai",
+            "description": "An award-winning platform that helps researchers evaluate scientific publications through Smart Citations that show whether claims are supported or contrasted."
+        },
+        {
+            "name": "Zotero",
+            "description": "A free, open-source reference manager that helps health researchers collect, organize, annotate, and cite research papers and bibliographies seamlessly."
+        },
+        {
+            "name": "Mendeley",
+            "description": "A reference manager and academic collaboration platform from Elsevier that helps researchers manage citations and collaborate on projects."
         }
     ]
 }

@@ -111,12 +111,12 @@ def main():
 
 
     if post_type == "tool":
-        tools = config.get("research_tools", [])
-        tools = [t for t in tools if t.get("name") not in posted_urls]
-        if tools:
-            selected_tool = random.choice(tools)
+        all_tools = config.get("research_tools", [])
+        unposted_tools = [t for t in all_tools if t.get("name") not in posted_urls]
+        available_tools = unposted_tools if unposted_tools else all_tools
+        if available_tools:
+            selected_tool = random.choice(available_tools)
             selected_article = {"title": selected_tool["name"], "source": "Tool", "company": selected_tool["description"], "url": ""}
-
         else:
             selected_article = {}
     elif post_type == "pubmed":
