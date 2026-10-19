@@ -100,6 +100,8 @@ def main():
     post_type = None
     if "--type=research" in sys.argv:
         post_type = "research"
+    elif "--type=pubmed" in sys.argv:
+        post_type = "pubmed"
     elif "--type=opportunity" in sys.argv:
         post_type = "opportunity"
     elif "--type=conference" in sys.argv:
@@ -117,6 +119,9 @@ def main():
 
         else:
             selected_article = {}
+    elif post_type == "pubmed":
+        pubmed_articles = [t for t in trends if "pubmed" in t.get("source", "").lower() or "pubmed" in t.get("title", "").lower()]
+        selected_article = random.choice(pubmed_articles) if pubmed_articles else {}
     elif post_type == "research" and trends:
         selected_article = random.choice(trends)
     elif post_type == "conference" and conferences:
@@ -155,11 +160,12 @@ def main():
             
             system_role = prompts.get("system_role", "You are a friendly, helpful colleague.")
             
-            # Determine if it's an opportunity or a trend/article
+            # Determine post type
             is_conference = '[Conference]' in article_title or source == 'WHO'
             is_tool = source == 'Tool'
+            is_pubmed = source == 'PubMed' or 'pubmed' in article_url.lower() or 'Research (PubMed)' in article_title
             is_opportunity = (source in ['Wuzzuf', 'ReliefWeb', 'ScholarshipsAds', 'Internships'] or \
-                             any(k in article_title.lower() for k in ['job', 'internship', 'scholarship'])) and not is_conference and not is_tool
+                             any(k in article_title.lower() for k in ['job', 'internship', 'scholarship'])) and not is_conference and not is_tool and not is_pubmed
             
             if is_tool:
                  user_prompt_template = prompts.get("tool_generation", "Write about this tool: {title}")
@@ -175,6 +181,21 @@ def main():
                  prompt = user_prompt_template.replace("{title}", article_title)\
                                               .replace("{company}", company)\
                                               .replace("{location}", location)
+            elif is_pubmed:
+                 abstract = selected_article.get("description", "")
+                 journal = company if company != "N/A" else "Medical Journal"
+                 prompt = (
+                     f"Act as a professional medical and health researcher. Write an engaging dual-language LinkedIn post (English and Arabic) highlighting this new scientific research study published in {journal}:\n"
+                     f"Study Title: {article_title}\n"
+                     + (f"Abstract / Summary: {abstract}\n" if abstract else "")
+                     + "\nStructure must be exactly as follows:\n"
+                     "English Section:\n"
+                     "[Explain the core objective, key findings/results of the study, and practical public health or clinical implications in a clear, compelling narrative. Keep it engaging, professional, and accessible to health professionals.]\n\n"
+                     "---\n"
+                     "Arabic Section:\n"
+                     "[Explain the exact same content in clear, natural Arabic. Focus on the core findings, importance of the study, and practical impact on health.]\n\n"
+                     "Make sure to literally print the text 'English Section:' and 'Arabic Section:' before the respective paragraphs."
+                 )
             else:
                  user_prompt_template = prompts.get("content_generation", "Summarize this: '{article_title}'")
                  prompt = user_prompt_template.replace("{article_title}", article_title)
@@ -196,6 +217,8 @@ def main():
                 post_content = f"📅 **Upcoming Conference / مؤتمر قادم**\n\n{ai_text}\n\n{hashtags}"
             elif is_opportunity:
                 post_content = f"🚀 **New Opportunity / فرصة جديدة**\n\n{ai_text}\n\n{hashtags}"
+            elif is_pubmed:
+                post_content = f"🔬 **New Research / دراسة بحثية جديدة**\n\n{ai_text}\n\n{hashtags}"
             else:
                 post_content = f"🎓 **Global Insights / رؤى عالمية**\n\n{ai_text}\n\n{hashtags}"
             
@@ -233,6 +256,8 @@ def main():
                  comment_text = f"🚀 للتقديم / Apply here: {article_url}"
             elif source == 'WHO':
                  comment_text = f"📅 للتسجيل والمشاركة / Register here: {article_url}"
+            elif is_pubmed or 'pubmed' in article_url.lower():
+                 comment_text = f"📄 رابط البحث الكامل / Read Full Paper: {article_url}"
             
             post_comment(post_id, comment_text, final_author)
             
