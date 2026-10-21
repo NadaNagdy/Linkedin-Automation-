@@ -128,7 +128,26 @@ def main():
         selected_article = random.choice(conferences)
     elif post_type == "opportunity" and combined_content:
         opps = [item for item in combined_content if item not in trends]
-        selected_article = random.choice(opps) if opps else random.choice(combined_content)
+        
+        def is_egypt_or_remote(item):
+            text = f"{item.get('location', '')} {item.get('title', '')} {item.get('company', '')}".lower()
+            return any(k in text for k in ['egypt', 'cairo', 'giza', 'alexandria', 'mansoura', 'assiut', 'tanta', 'monufya', 'remote', 'telework', 'online', 'virtual', 'work from home'])
+
+        # Priority 1: Fresh Egypt or Remote opportunities posted this month
+        egypt_remote_fresh = [o for o in opps if is_egypt_or_remote(o) and o.get('is_fresh')]
+        # Priority 2: Any Egypt or Remote opportunities
+        egypt_remote_all = [o for o in opps if is_egypt_or_remote(o)]
+        # Priority 3: Any fresh opportunities
+        fresh_opps = [o for o in opps if o.get('is_fresh')]
+
+        if egypt_remote_fresh:
+            selected_article = random.choice(egypt_remote_fresh)
+        elif egypt_remote_all:
+            selected_article = random.choice(egypt_remote_all)
+        elif fresh_opps:
+            selected_article = random.choice(fresh_opps)
+        else:
+            selected_article = random.choice(opps) if opps else random.choice(combined_content)
     else:
         # Fallback to random if type not specified or list empty
         all_options = combined_content + conferences

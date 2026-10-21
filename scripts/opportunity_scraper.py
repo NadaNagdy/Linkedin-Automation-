@@ -55,8 +55,8 @@ def scrape_wuzzuf_jobs(query="medical", category="Job"):
 
                 full_link = link if link.startswith('http') else f"https://wuzzuf.net{link}"
                 
-                # Check for "Just now", "Today", or "1 hour ago" to prioritize new items
-                is_fresh = any(x in date_posted.lower() for x in ["now", "hour", "today", "minute"])
+                # Check for freshness (today, hours, days ago, or this month)
+                is_fresh = any(x in date_posted.lower() for x in ["now", "hour", "today", "minute", "day", "days", "2026-10", "oct"])
                 
                 jobs.append({
                     'title': f"[{category}] {title}", 
@@ -75,45 +75,51 @@ def scrape_wuzzuf_jobs(query="medical", category="Job"):
         return []
 
 def scrape_reliefweb_jobs(query="health", category="Job"):
-    """Scrapes jobs/internships from ReliefWeb."""
-    url = f"https://reliefweb.int/jobs?search={query.replace(' ', '+')}"
-    print(f"Scraping ReliefWeb ({category}): {url}")
-    try:
-        response = requests.get(url, headers=get_headers(), timeout=15)
-        response.raise_for_status()
-        soup = BeautifulSoup(response.content, 'html.parser')
-        
-        jobs = []
-        job_cards = soup.select('article.rw-river-article')
-        
-        for card in job_cards:
-            title_elem = card.select_one('.rw-river-article__title a')
-            org_elem = card.select_one('.rw-entity-meta__tag-value--source a')
-            location_elem = card.select_one('.rw-entity-country-slug a') 
-            date_elem = card.select_one('.rw-entity-meta__tag-value--posted time')
+    """Scrapes jobs/internships from ReliefWeb prioritizing Egypt and Remote."""
+    jobs = []
+    urls = [
+        f"https://reliefweb.int/jobs?search={query.replace(' ', '+')}&country=82",
+        f"https://reliefweb.int/jobs?search={query.replace(' ', '+')}&telework=1"
+    ]
+    for url in urls:
+        print(f"Scraping ReliefWeb ({category}): {url}")
+        try:
+            response = requests.get(url, headers=get_headers(), timeout=15)
+            response.raise_for_status()
+            soup = BeautifulSoup(response.content, 'html.parser')
             
-            if title_elem:
-                title = title_elem.text.strip()
-                link = title_elem['href']
-                company = org_elem.text.strip() if org_elem else "N/A"
-                location = location_elem.text.strip() if location_elem else "N/A"
-                date_posted = date_elem.text.strip() if date_elem else datetime.now().strftime("%Y-%m-%d")
+            job_cards = soup.select('article.rw-river-article')
+            for card in job_cards[:8]:
+                title_elem = card.select_one('.rw-river-article__title a')
+                org_elem = card.select_one('.rw-entity-meta__tag-value--source a')
+                location_elem = card.select_one('.rw-entity-country-slug a') 
+                date_elem = card.select_one('.rw-entity-meta__tag-value--posted time')
+                
+                if title_elem:
+                    title = title_elem.text.strip()
+                    link = title_elem['href']
+                    company = org_elem.text.strip() if org_elem else "N/A"
+                    location = location_elem.text.strip() if location_elem else ("Egypt" if "country=82" in url else "Remote")
+                    if "telework=1" in url and "remote" not in location.lower():
+                        location = f"{location} (Remote)" if location != "N/A" else "Remote"
+                    date_posted = date_elem.text.strip() if date_elem else datetime.now().strftime("%Y-%m-%d")
 
-                jobs.append({
-                    'title': f"[{category}] {title}", 
-                    'company': company,
-                    'location': location,
-                    'link': link,
-                    'date_posted': date_posted,
-                    'source': 'ReliefWeb',
-                    'is_fresh': True # ReliefWeb sorts by date usually
-                })
-        
-        logging.info(f"Scraped {len(jobs)} {category} from ReliefWeb")
-        return jobs
-    except Exception as e:
-        logging.error(f"Error scraping ReliefWeb ({category}): {str(e)}")
-        return []
+                    is_fresh = any(x in date_posted.lower() for x in ["oct", "2026", "now", "today", "hour", "day"])
+
+                    jobs.append({
+                        'title': f"[{category}] {title}", 
+                        'company': company,
+                        'location': location,
+                        'link': link,
+                        'date_posted': date_posted,
+                        'source': 'ReliefWeb',
+                        'is_fresh': is_fresh
+                    })
+        except Exception as e:
+            logging.error(f"Error scraping ReliefWeb ({category}): {str(e)}")
+    
+    logging.info(f"Scraped {len(jobs)} {category} from ReliefWeb")
+    return jobs
 
 def scrape_scholarships(query="medical"):
     """Scrapes scholarships from ScholarshipsAds."""
@@ -189,13 +195,14 @@ def scrape_ahram_health(url="https://english.ahram.org.eg/Portal/54/0/Health.asp
         logging.error(f"Error scraping Ahram Online: {str(e)}")
         return []
 
-def scrape_internships(query="internship"):
+def scrape_internships(query="medical internship"):
     """Scrapes internships from various sources."""
-    print(f"🔎 Scraping Internships with query: {query}")
+    print(f"🔎 Scraping Internships prioritizing Egypt and Remote...")
     internships = []
     
-    internships.extend(scrape_wuzzuf_jobs(query, category="Internship"))
-    internships.extend(scrape_reliefweb_jobs(query, category="Internship"))
+    for q in ["medical internship", "pharmacy internship", "health internship"]:
+        internships.extend(scrape_wuzzuf_jobs(q, category="Internship"))
+    internships.extend(scrape_reliefweb_jobs("internship", category="Internship"))
     
     return internships
 
@@ -239,39 +246,36 @@ def scrape_opportunities(queries=None):
         
     all_opportunities = []
     
-    # Jobs (Wuzzuf)
-    q_wuzzuf = queries.get('wuzzuf')
-    if q_wuzzuf:
-         all_opportunities.extend(scrape_wuzzuf_jobs(q_wuzzuf, category="Job"))
-    else:
-         all_opportunities.extend(scrape_wuzzuf_jobs(category="Job"))
+    # 1. Jobs from Wuzzuf (Egypt medical, clinical research, pharmacist, public health)
+    wuzzuf_queries = ['medical', 'clinical research', 'pharmacist', 'public health']
+    for q in wuzzuf_queries:
+        all_opportunities.extend(scrape_wuzzuf_jobs(q, category="Job"))
 
-    # Jobs (ReliefWeb)
-    q_relief = queries.get('reliefweb')
-    if q_relief:
-        all_opportunities.extend(scrape_reliefweb_jobs(q_relief, category="Job"))
-    else:
-        all_opportunities.extend(scrape_reliefweb_jobs(category="Job"))
+    # 2. Jobs from ReliefWeb (Egypt & Remote)
+    q_relief = queries.get('reliefweb', 'health')
+    all_opportunities.extend(scrape_reliefweb_jobs(q_relief, category="Job"))
 
-    # Scholarships
-    q_scholar = queries.get('scholarships')
-    if q_scholar:
-        all_opportunities.extend(scrape_scholarships(q_scholar))
-    else:
-        all_opportunities.extend(scrape_scholarships())
+    # 3. Scholarships
+    q_scholar = queries.get('scholarships', 'medical')
+    all_opportunities.extend(scrape_scholarships(q_scholar))
 
-    # Internships
-    q_intern = queries.get('internships')
-    if q_intern:
-        all_opportunities.extend(scrape_internships(q_intern))
-    else:
-        all_opportunities.extend(scrape_internships("medical internship"))
+    # 4. Internships (Egypt & Remote)
+    all_opportunities.extend(scrape_internships())
 
-    # Ahram
+    # 5. Ahram
     q_ahram = queries.get('ahram_category_url')
     if q_ahram:
         all_opportunities.extend(scrape_ahram_health(q_ahram))
     else:
         all_opportunities.extend(scrape_ahram_health())
     
-    return all_opportunities
+    # Deduplicate by link
+    seen_links = set()
+    unique_opps = []
+    for item in all_opportunities:
+        link = item.get('link')
+        if link and link not in seen_links:
+            seen_links.add(link)
+            unique_opps.append(item)
+            
+    return unique_opps
