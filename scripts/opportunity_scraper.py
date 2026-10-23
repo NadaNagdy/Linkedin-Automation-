@@ -25,6 +25,22 @@ def get_headers():
         'Referer': 'https://www.google.com/'
     }
 
+def is_health_related(title, company=""):
+    """Checks if a job title or company is health/medical/pharma related."""
+    text = f"{title} {company}".lower()
+    keywords = [
+        'medic', 'health', 'clinic', 'pharma', 'doctor', 'nurse', 'nursing',
+        'hospital', 'biotech', 'patient', 'dental', 'dentist', 'nutrition', 'diet',
+        'lab', 'laboratory', 'pathology', 'radiology', 'therapy', 'therapist',
+        'epidemiolog', 'surgery', 'surgical', 'care', 'cardio', 'pediatric',
+        'oncology', 'biomedic', 'healthcare', 'sanofi', 'eva pharma', 'novartis',
+        'andalous', 'pfizer', 'astrazeneca', 'gsk', 'roche', 'bayer', 'abbott',
+        'hikma', 'amoun', 'eiphico', 'sedico', 'saudi german', 'cleopatra', 'dar al fouad',
+        'who', 'msf', 'unicef', 'unfpa', 'biochem', 'chemist', 'physician',
+        'pharmacovigilance', 'qppv', 'regulatory affairs', 'clinical research', 'cra'
+    ]
+    return any(k in text for k in keywords)
+
 def scrape_wuzzuf_jobs(query="medical", category="Job"):
     """Scrapes jobs/internships from Wuzzuf."""
     url = f"https://wuzzuf.net/search/jobs/?q={query.replace(' ', '+')}&a=hpb"
@@ -48,8 +64,13 @@ def scrape_wuzzuf_jobs(query="medical", category="Job"):
             
             if title_elem:
                 title = title_elem.text.strip()
-                link = title_elem['href']
                 company = company_elem.text.strip().rstrip(' -') if company_elem else "N/A"
+                
+                # Strict health check to avoid off-topic jobs like accounting clerk
+                if not is_health_related(title, company):
+                    continue
+
+                link = title_elem['href']
                 location = location_elem.text.strip() if location_elem else "N/A"
                 date_posted = date_elem.text.strip() if date_elem else datetime.now().strftime("%Y-%m-%d")
 
@@ -207,38 +228,41 @@ def scrape_internships(query="medical internship"):
     return internships
 
 def scrape_medical_conferences():
-    """Scrapes medical conferences from WHO events."""
+    """Scrapes medical conferences from WHO events with retry logic."""
     url = "https://www.who.int/news-room/events"
     print(f"Scraping WHO Events (Conferences): {url}")
-    try:
-        response = requests.get(url, headers=get_headers(), timeout=15)
-        response.raise_for_status()
-        soup = BeautifulSoup(response.content, 'html.parser')
-        
-        conferences = []
-        for a in soup.find_all('a', href=True):
-            href = a['href']
-            if '/news-room/events/detail/' in href:
-                title = a.text.strip().replace('\n', ' ')
-                import re
-                title = re.sub(' +', ' ', title)
-                if len(title) > 10 and not any(c['link'].endswith(href) for c in conferences):
-                    full_link = href if href.startswith('http') else f"https://www.who.int{href}"
-                    conferences.append({
-                        'title': f"[Conference] {title}",
-                        'company': "World Health Organization (WHO)",
-                        'location': "Global/Virtual",
-                        'link': full_link,
-                        'date_posted': datetime.now().strftime("%Y-%m-%d"),
-                        'source': 'WHO',
-                        'is_fresh': True
-                    })
-                    
-        logging.info(f"Scraped {len(conferences)} conferences from WHO")
-        return conferences[:10]
-    except Exception as e:
-        logging.error(f"Error scraping WHO Events: {str(e)}")
-        return []
+    conferences = []
+    for attempt in range(2):
+        try:
+            response = requests.get(url, headers=get_headers(), timeout=25)
+            response.raise_for_status()
+            soup = BeautifulSoup(response.content, 'html.parser')
+            
+            for a in soup.find_all('a', href=True):
+                href = a['href']
+                if '/news-room/events/detail/' in href:
+                    title = a.text.strip().replace('\n', ' ')
+                    import re
+                    title = re.sub(' +', ' ', title)
+                    if len(title) > 10 and not any(c['link'].endswith(href) for c in conferences):
+                        full_link = href if href.startswith('http') else f"https://www.who.int{href}"
+                        conferences.append({
+                            'title': f"[Conference] {title}",
+                            'company': "World Health Organization (WHO)",
+                            'location': "Global/Virtual",
+                            'link': full_link,
+                            'date_posted': datetime.now().strftime("%Y-%m-%d"),
+                            'source': 'WHO',
+                            'is_fresh': True
+                        })
+                        
+            if conferences:
+                logging.info(f"Scraped {len(conferences)} conferences from WHO")
+                return conferences[:10]
+        except Exception as e:
+            logging.warning(f"Attempt {attempt + 1} failed scraping WHO Events: {str(e)}")
+            
+    return conferences[:10]
 
 def scrape_opportunities(queries=None):
     if queries is None:
