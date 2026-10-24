@@ -218,7 +218,7 @@ def main():
                  prompt = user_prompt_template.replace("{article_title}", article_title)
             
             completion = client.chat.completions.create(
-                model=settings.get("openai_model", "gpt-3.5-turbo"),
+                model=settings.get("openai_model", "gpt-4o-mini"),
                 messages=[
                     {"role": "system", "content": system_role},
                     {"role": "user", "content": prompt}
@@ -241,7 +241,8 @@ def main():
             
         except Exception as e:
             print(f"❌ OpenAI Error: {e}")
-            post_content = f"📌 **Topic of the Day**\n\n{article_title}\n\n(AI generation failed.)"
+            print("⚠️ Skipping LinkedIn post to avoid publishing incomplete content.")
+            return
     else:
         print("⚠️ OPENAI_API_KEY not found. Skipping AI generation.")
         post_content = f"📌 **Topic of the Day**\n\n{article_title}\n\n#TechNews"
