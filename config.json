@@ -133,6 +133,46 @@
         {
             "name": "Mendeley",
             "description": "A reference manager and academic collaboration platform from Elsevier that helps researchers manage citations and collaborate on projects."
+        },
+        {
+            "name": "Dimensions.ai",
+            "description": "A comprehensive linked research knowledge platform covering millions of peer-reviewed publications, clinical trials, patents, and policy documents."
+        },
+        {
+            "name": "OpenAlex",
+            "description": "A fully open, comprehensive catalog of global research papers, scholarly authors, institutions, and open scientific citation networks."
+        },
+        {
+            "name": "Trip Database",
+            "description": "A premier clinical search engine designed to allow health practitioners and researchers to quickly find high-quality evidence-based clinical practice guidelines and systematic reviews."
+        },
+        {
+            "name": "MedRxiv",
+            "description": "The leading pre-print server for health and medical sciences, providing rapid access to the latest clinical research findings before formal peer review."
+        },
+        {
+            "name": "Scholarcy",
+            "description": "An AI-powered academic summarizer that reads research papers and breaks them down into interactive summary flashcards with key findings and tables."
+        },
+        {
+            "name": "Litmaps",
+            "description": "A literature discovery and visualization platform that maps scientific citations and automatically notifies researchers of emerging connected papers in their niche."
+        },
+        {
+            "name": "Examine.com",
+            "description": "The largest independent, evidence-based medical database analyzing clinical trials on nutrition, dietary supplements, and lifestyle medicine."
+        },
+        {
+            "name": "GeneCards",
+            "description": "An integrative biomedical database providing concise genomic, transcriptomic, genetic, and clinical disease information on all known human genes."
+        },
+        {
+            "name": "Paper Digest",
+            "description": "An AI literature review assistant that summarizes complex scientific papers into key research questions, methodology takeaways, and conclusions."
+        },
+        {
+            "name": "BioRxiv",
+            "description": "The dedicated preprint repository for biological and life sciences research, hosted by Cold Spring Harbor Laboratory."
         }
     ]
 }

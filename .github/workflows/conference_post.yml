@@ -2,7 +2,7 @@ name: Auto-Post Conference
 on:
   workflow_dispatch:
   schedule:
-    - cron: '31 17 * * *'
+    - cron: '30 16 * * *'
 
 permissions:
   contents: write
@@ -38,6 +38,7 @@ jobs:
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git pull --rebase origin main || true
           git add history.json || true
           git commit -m "Auto-update history.json [skip ci]" || true
-          git push || true
+          git push origin main || true
