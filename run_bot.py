@@ -119,9 +119,12 @@ def main():
             selected_article = {"title": selected_tool["name"], "source": "Tool", "company": selected_tool["description"], "url": ""}
         else:
             selected_article = {}
-    elif post_type in ["pubmed", "research"] and trends:
+    elif post_type in ["pubmed", "research"]:
         pubmed_articles = [t for t in trends if "pubmed" in t.get("source", "").lower() or "pubmed" in t.get("title", "").lower()]
-        selected_article = random.choice(pubmed_articles) if pubmed_articles else random.choice(trends)
+        if post_type == "pubmed":
+            selected_article = random.choice(pubmed_articles) if pubmed_articles else {}
+        else:
+            selected_article = random.choice(pubmed_articles) if pubmed_articles else (random.choice(trends) if trends else {})
     elif post_type == "conference" and conferences:
         selected_article = random.choice(conferences)
     elif post_type == "opportunity" and combined_content:
