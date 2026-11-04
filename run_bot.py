@@ -123,10 +123,15 @@ def main():
         pubmed_articles = [t for t in trends if "pubmed" in t.get("source", "").lower() or "pubmed" in t.get("title", "").lower()]
         if post_type == "pubmed":
             selected_article = random.choice(pubmed_articles) if pubmed_articles else {}
-        else:
-            selected_article = random.choice(pubmed_articles) if pubmed_articles else (random.choice(trends) if trends else {})
     elif post_type == "conference" and conferences:
-        selected_article = random.choice(conferences)
+        egypt_confs = [c for c in conferences if any(k in f"{c.get('location', '')} {c.get('title', '')}".lower() for k in ['egypt', 'cairo', 'giza', 'alexandria', 'elmohndseen', 'sharm', 'hurghada'])]
+        non_who_confs = [c for c in conferences if c.get('source') != 'WHO']
+        if egypt_confs:
+            selected_article = random.choice(egypt_confs)
+        elif non_who_confs:
+            selected_article = random.choice(non_who_confs)
+        else:
+            selected_article = random.choice(conferences)
     elif post_type == "opportunity" and combined_content:
         opps = [item for item in combined_content if item not in trends]
         
@@ -181,7 +186,7 @@ def main():
             system_role = prompts.get("system_role", "You are a friendly, helpful colleague.")
             
             # Determine post type
-            is_conference = '[Conference]' in article_title or source == 'WHO'
+            is_conference = '[Conference]' in article_title or source in ['WHO', 'ConferenceAlerts']
             is_tool = source == 'Tool'
             is_pubmed = source == 'PubMed' or 'pubmed' in article_url.lower() or 'Research (PubMed)' in article_title
             is_opportunity = (source in ['Wuzzuf', 'ReliefWeb', 'ScholarshipsAds', 'Internships'] or \
@@ -275,7 +280,7 @@ def main():
              # If opportunity, emphasize applying
             if source in ['Wuzzuf', 'ReliefWeb', 'ScholarshipsAds', 'Internships']:
                  comment_text = f"🚀 للتقديم / Apply here: {article_url}"
-            elif source == 'WHO':
+            elif is_conference or source in ['WHO', 'ConferenceAlerts']:
                  comment_text = f"📅 للتسجيل والمشاركة / Register here: {article_url}"
             elif is_pubmed or 'pubmed' in article_url.lower():
                  comment_text = f"📄 رابط البحث الكامل / Read Full Paper: {article_url}"
