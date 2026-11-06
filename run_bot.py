@@ -110,6 +110,7 @@ def main():
         post_type = "tool"
 
 
+    selected_article = {}
     if post_type == "tool":
         all_tools = config.get("research_tools", [])
         unposted_tools = [t for t in all_tools if t.get("name") not in posted_urls]
@@ -123,6 +124,8 @@ def main():
         pubmed_articles = [t for t in trends if "pubmed" in t.get("source", "").lower() or "pubmed" in t.get("title", "").lower()]
         if post_type == "pubmed":
             selected_article = random.choice(pubmed_articles) if pubmed_articles else {}
+        else:
+            selected_article = random.choice(pubmed_articles) if pubmed_articles else (random.choice(trends) if trends else {})
     elif post_type == "conference" and conferences:
         egypt_confs = [c for c in conferences if any(k in f"{c.get('location', '')} {c.get('title', '')}".lower() for k in ['egypt', 'cairo', 'giza', 'alexandria', 'elmohndseen', 'sharm', 'hurghada'])]
         non_who_confs = [c for c in conferences if c.get('source') != 'WHO']
