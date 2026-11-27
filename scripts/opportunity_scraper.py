@@ -221,9 +221,10 @@ def scrape_internships(query="medical internship"):
     print(f"🔎 Scraping Internships prioritizing Egypt and Remote...")
     internships = []
     
-    for q in ["medical internship", "pharmacy internship", "health internship"]:
+    for q in ["medical internship", "pharmacy internship", "health internship", "nursing internship"]:
         internships.extend(scrape_wuzzuf_jobs(q, category="Internship"))
     internships.extend(scrape_reliefweb_jobs("internship", category="Internship"))
+    internships.extend(scrape_reliefweb_jobs("nursing internship", category="Internship"))
     
     return internships
 
@@ -232,75 +233,85 @@ def scrape_medical_conferences():
     conferences = []
     headers = get_headers()
     
-    # 1. Egypt Medical & Health Conferences (AllConferenceAlert)
-    try:
-        url_egypt = "https://www.allconferencealert.com/egypt/health-and-medicine.html"
-        print(f"Scraping Egypt Conferences: {url_egypt}")
-        res_egypt = requests.get(url_egypt, headers=headers, timeout=15)
-        if res_egypt.status_code == 200:
-            soup = BeautifulSoup(res_egypt.text, 'html.parser')
-            for it in soup.find_all('div', class_='cp-item-main'):
-                a = it.find('a', href=True)
-                if not a: continue
-                title = a.text.strip()
-                link = a['href']
-                lines = [l.strip() for l in it.get_text('\n', strip=True).split('\n') if l.strip()]
-                city = "Egypt"
-                organizer = "Medical Conference Committee"
-                dates = ""
-                for l in lines[1:]:
-                    if any(c in l.lower() for c in ['cairo', 'giza', 'alexandria', 'elmohndseen', 'sharm', 'hurghada', 'luxor', 'mansoura', 'tanta']):
-                        city = f"{l}, Egypt"
-                    elif any(m in l.lower() for m in ['nov', 'dec', 'jan', 'feb', 'mar', '2026', '2027']):
-                        dates = l
-                    elif len(l) > 3 and not l.startswith('·') and l != lines[1]:
-                        organizer = l
-                conferences.append({
-                    'title': f"[Conference] {title}",
-                    'company': organizer,
-                    'location': f"{city} ({dates})" if dates else city,
-                    'link': link,
-                    'date_posted': datetime.now().strftime("%Y-%m-%d"),
-                    'source': 'ConferenceAlerts',
-                    'is_fresh': True
-                })
-            logging.info(f"Scraped {len(conferences)} Egypt conferences from AllConferenceAlert")
-    except Exception as e:
-        logging.error(f"Error scraping Egypt conferences: {str(e)}")
-
-    # 2. International Health & Medicine Conferences (AllConferenceAlert)
-    try:
-        url_global = "https://www.allconferencealert.com/health-and-medicine.html"
-        print(f"Scraping Global Conferences: {url_global}")
-        res_global = requests.get(url_global, headers=headers, timeout=15)
-        if res_global.status_code == 200:
-            soup_g = BeautifulSoup(res_global.text, 'html.parser')
-            for a in soup_g.find_all('a', href=True):
-                if '/conference/' in a['href'] and len(a.text.strip()) > 15:
+    # 1. Egypt Medical, Health & Nursing Conferences (AllConferenceAlert)
+    egypt_urls = [
+        "https://www.allconferencealert.com/egypt/health-and-medicine.html",
+        "https://www.allconferencealert.com/egypt/nursing.html"
+    ]
+    for url_egypt in egypt_urls:
+        try:
+            print(f"Scraping Egypt Conferences: {url_egypt}")
+            res_egypt = requests.get(url_egypt, headers=headers, timeout=15)
+            if res_egypt.status_code == 200:
+                soup = BeautifulSoup(res_egypt.text, 'html.parser')
+                for it in soup.find_all('div', class_='cp-item-main'):
+                    a = it.find('a', href=True)
+                    if not a: continue
                     link = a['href']
                     if any(c['link'] == link for c in conferences):
                         continue
-                    parent = a.find_parent('tr') or a.find_parent('div')
-                    text = parent.get_text(' | ', strip=True) if parent else a.text.strip()
-                    parts = [p.strip() for p in text.split('|') if p.strip()]
-                    location = "International / Virtual"
-                    organizer = "International Health Forum"
-                    for p in parts[1:]:
-                        if any(c in p for c in [', USA', ', UK', ', Germany', ', France', ', Canada', ', Australia', ', UAE', ', Poland', ', Spain']):
-                            location = p
-                        elif len(p) > 3 and not any(m in p.lower() for m in ['nov', 'dec', '2026']):
-                            organizer = p
+                    title = a.text.strip()
+                    lines = [l.strip() for l in it.get_text('\n', strip=True).split('\n') if l.strip()]
+                    city = "Egypt"
+                    organizer = "Medical & Nursing Conference Committee"
+                    dates = ""
+                    for l in lines[1:]:
+                        if any(c in l.lower() for c in ['cairo', 'giza', 'alexandria', 'elmohndseen', 'sharm', 'hurghada', 'luxor', 'mansoura', 'tanta']):
+                            city = f"{l}, Egypt"
+                        elif any(m in l.lower() for m in ['nov', 'dec', 'jan', 'feb', 'mar', '2026', '2027']):
+                            dates = l
+                        elif len(l) > 3 and not l.startswith('·') and l != lines[1]:
+                            organizer = l
                     conferences.append({
-                        'title': f"[Conference] {a.text.strip()}",
+                        'title': f"[Conference] {title}",
                         'company': organizer,
-                        'location': location,
+                        'location': f"{city} ({dates})" if dates else city,
                         'link': link,
                         'date_posted': datetime.now().strftime("%Y-%m-%d"),
                         'source': 'ConferenceAlerts',
                         'is_fresh': True
                     })
-    except Exception as e:
-        logging.error(f"Error scraping global conferences: {str(e)}")
+        except Exception as e:
+            logging.error(f"Error scraping Egypt conferences from {url_egypt}: {str(e)}")
+    logging.info(f"Scraped {len(conferences)} Egypt conferences from AllConferenceAlert")
+
+    # 2. International Health, Medicine & Nursing Conferences (AllConferenceAlert)
+    global_urls = [
+        "https://www.allconferencealert.com/health-and-medicine.html",
+        "https://www.allconferencealert.com/nursing.html"
+    ]
+    for url_global in global_urls:
+        try:
+            print(f"Scraping Global Conferences: {url_global}")
+            res_global = requests.get(url_global, headers=headers, timeout=15)
+            if res_global.status_code == 200:
+                soup_g = BeautifulSoup(res_global.text, 'html.parser')
+                for a in soup_g.find_all('a', href=True):
+                    if '/conference/' in a['href'] and len(a.text.strip()) > 15:
+                        link = a['href']
+                        if any(c['link'] == link for c in conferences):
+                            continue
+                        parent = a.find_parent('tr') or a.find_parent('div')
+                        text = parent.get_text(' | ', strip=True) if parent else a.text.strip()
+                        parts = [p.strip() for p in text.split('|') if p.strip()]
+                        location = "International / Virtual"
+                        organizer = "International Health & Nursing Forum"
+                        for p in parts[1:]:
+                            if any(c in p for c in [', USA', ', UK', ', Germany', ', France', ', Canada', ', Australia', ', UAE', ', Poland', ', Spain']):
+                                location = p
+                            elif len(p) > 3 and not any(m in p.lower() for m in ['nov', 'dec', '2026']):
+                                organizer = p
+                        conferences.append({
+                            'title': f"[Conference] {a.text.strip()}",
+                            'company': organizer,
+                            'location': location,
+                            'link': link,
+                            'date_posted': datetime.now().strftime("%Y-%m-%d"),
+                            'source': 'ConferenceAlerts',
+                            'is_fresh': True
+                        })
+        except Exception as e:
+            logging.error(f"Error scraping global conferences from {url_global}: {str(e)}")
 
     # 3. WHO Events & Global Consultations
     url_who = "https://www.who.int/news-room/events"
@@ -341,14 +352,15 @@ def scrape_opportunities(queries=None):
         
     all_opportunities = []
     
-    # 1. Jobs from Wuzzuf (Egypt medical, clinical research, pharmacist, public health)
-    wuzzuf_queries = ['medical', 'clinical research', 'pharmacist', 'public health']
+    # 1. Jobs from Wuzzuf (Egypt medical, nursing, clinical research, pharmacist, public health)
+    wuzzuf_queries = ['medical', 'nurse', 'nursing', 'clinical research', 'pharmacist', 'public health']
     for q in wuzzuf_queries:
         all_opportunities.extend(scrape_wuzzuf_jobs(q, category="Job"))
 
-    # 2. Jobs from ReliefWeb (Egypt & Remote)
+    # 2. Jobs from ReliefWeb (Egypt & Remote, health & nursing)
     q_relief = queries.get('reliefweb', 'health')
     all_opportunities.extend(scrape_reliefweb_jobs(q_relief, category="Job"))
+    all_opportunities.extend(scrape_reliefweb_jobs("nursing", category="Job"))
 
     # 3. Scholarships
     q_scholar = queries.get('scholarships', 'medical')

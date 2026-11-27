@@ -8,28 +8,33 @@
     },
     "search_queries": {
         "wuzzuf": "medical",
+        "wuzzuf_nursing": "nurse",
         "reliefweb": "health",
+        "reliefweb_nursing": "nursing",
         "scholarships": "medical",
         "internships": "medical internship",
         "ahram_category_url": "https://english.ahram.org.eg/Portal/54/0/Health.aspx"
     },
     "prompts": {
-        "system_role": "You are a friendly and knowledgeable health tech enthusiast.",
+        "system_role": "You are a friendly and knowledgeable health tech, medical, and nursing career enthusiast.",
         "content_generation": "I need a dual-language post (English and Arabic) about this headline: '{article_title}'.\n\nStructure must be exactly as follows:\nEnglish Section:\n[Explain the core idea, results, and recommendations naturally in one flow. Keep it engaging and professional.]\n\n---\nArabic Section:\n[Explain the same content in clear Arabic. Write it naturally and focus on the result and recommendation.]\n\nMake sure to literally print the text 'English Section:' and 'Arabic Section:' before the respective paragraphs.",
-        "opportunity_generation": "Act as a professional career mentor in the medical field. Write a dual-language LinkedIn post (English and Arabic) about this opportunity:\nRole: {title}\nCompany: {company}\nLocation: {location}\n\nStructure must be exactly as follows:\nEnglish Section:\n[Provide a professional hook, mention the role and company, give 2-3 pieces of professional advice or requirements, and end with a call to action. Keep it engaging.]\n\n---\nArabic Section:\n[Provide the exact same content translated into clear, professional Arabic. Maintain a professional yet approachable tone.]\n\nMake sure to literally print the text 'English Section:' and 'Arabic Section:' before the respective paragraphs. Do not add any extra bracketed headers (like [القسم الإنجليزي:]).",
-        "conference_generation": "Act as a professional medical career mentor. Write a dual-language LinkedIn post (English and Arabic) about this upcoming medical conference:\nTitle: {title}\nOrganizer: {company}\nLocation: {location}\n\nStructure must be exactly as follows:\nEnglish Section:\n[Provide a professional hook, describe the conference theme. Write why it is a great opportunity for specialties related to the theme and what they will gain from attending. Mention that the registration link is in the first comment.\n\nTag relevant universities or institutions involved using @. **CRITICAL: You must place EACH university tag on a separate new line, like a list, so they render correctly on LinkedIn.**]\n\n---\nArabic Section:\n[Provide the exact same content translated into clear, professional Arabic. Maintain a professional yet approachable tone. Also include the university tags here with each tag on a separate new line.]\n\nMake sure to literally print the text 'English Section:' and 'Arabic Section:' before the respective paragraphs.",
+        "opportunity_generation": "Act as a professional career mentor in the healthcare, medical, and nursing field. Write a dual-language LinkedIn post (English and Arabic) about this opportunity:\nRole: {title}\nCompany: {company}\nLocation: {location}\n\nStructure must be exactly as follows:\nEnglish Section:\n[Provide a professional hook, mention the role and company, give 2-3 pieces of professional advice or requirements, and end with a call to action. Keep it engaging.]\n\n---\nArabic Section:\n[Provide the exact same content translated into clear, professional Arabic. Maintain a professional yet approachable tone.]\n\nMake sure to literally print the text 'English Section:' and 'Arabic Section:' before the respective paragraphs. Do not add any extra bracketed headers (like [القسم الإنجليزي:]).",
+        "conference_generation": "Act as a professional healthcare and medical career mentor. Write a dual-language LinkedIn post (English and Arabic) about this upcoming medical, healthcare, or nursing conference:\nTitle: {title}\nOrganizer: {company}\nLocation: {location}\n\nStructure must be exactly as follows:\nEnglish Section:\n[Provide a professional hook, describe the conference theme. Write why it is a great opportunity for specialties related to the theme and what they will gain from attending. Mention that the registration link is in the first comment.\n\nTag relevant universities or institutions involved using @. **CRITICAL: You must place EACH university tag on a separate new line, like a list, so they render correctly on LinkedIn.**]\n\n---\nArabic Section:\n[Provide the exact same content translated into clear, professional Arabic. Maintain a professional yet approachable tone. Also include the university tags here with each tag on a separate new line.]\n\nMake sure to literally print the text 'English Section:' and 'Arabic Section:' before the respective paragraphs.",
         "tool_generation": "Act as a professional academic mentor. Write a dual-language LinkedIn post (English and Arabic) recommending this research tool/database:\nTool Name: {title}\nDescription: {description}\n\nStructure must be exactly as follows:\nEnglish Section:\n[Provide an engaging hook about the importance of finding good research. Introduce the tool, explain its main features based on the description, and tell the audience who should use it. End with a question encouraging them to share their favorite tools.]\n\n---\nArabic Section:\n[Provide the exact same content translated into clear, professional Arabic.]\n\nMake sure to literally print the text 'English Section:' and 'Arabic Section:' before the respective paragraphs. Do not add any extra bracketed headers."
     },
     "posting": {
         "hashtags": [
             "#HealthTech",
+            "#Healthcare",
+            "#Nursing",
             "#Innovation",
             "#Education",
             "#PublicHealth",
             "#Research",
             "#Jobs",
             "#Scholarships",
-            "#Internships"
+            "#Internships",
+            "#تمريض"
         ],
         "author_urn_env_key": "LINKEDIN_AUTHOR_URN"
     },
@@ -173,6 +178,14 @@
         {
             "name": "BioRxiv",
             "description": "The dedicated preprint repository for biological and life sciences research, hosted by Cold Spring Harbor Laboratory."
+        },
+        {
+            "name": "Sigma Repository (Sigma Theta Tau International)",
+            "description": "A premier global open-access repository dedicated specifically to nursing research, evidence-based clinical practice materials, and dissertations."
+        },
+        {
+            "name": "Cochrane Nursing Care Field",
+            "description": "An international initiative delivering high-quality evidence-based healthcare reviews specifically focused on nursing care and clinical practice."
         }
     ]
 }

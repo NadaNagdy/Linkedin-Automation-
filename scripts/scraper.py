@@ -21,7 +21,7 @@ def fetch_trends():
     # 2. سحب أبحاث من PubMed عبر NCBI E-utilities API
     try:
         search_url = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi"
-        term = "public health[Title/Abstract] OR digital health[Title/Abstract] OR artificial intelligence medicine[Title/Abstract] OR clinical trial[Title/Abstract] OR epidemiology[Title/Abstract] OR pharmacology[Title/Abstract] OR oncology[Title/Abstract]"
+        term = "public health[Title/Abstract] OR digital health[Title/Abstract] OR artificial intelligence medicine[Title/Abstract] OR clinical trial[Title/Abstract] OR epidemiology[Title/Abstract] OR pharmacology[Title/Abstract] OR oncology[Title/Abstract] OR nursing[Title/Abstract] OR nursing care[Title/Abstract] OR critical care nursing[Title/Abstract]"
         params = {
             "db": "pubmed",
             "term": term,
